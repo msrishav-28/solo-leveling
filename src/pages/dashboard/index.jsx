@@ -10,7 +10,7 @@ import UpcomingReminders from './components/UpcomingReminders';
 import QuickStats from './components/QuickStats';
 
 // Cinematic Components
-import Space3D from '../../components/cinematic/Space3D';
+import SystemBackground from '../../components/cinematic/SystemBackground';
 import Magnetic from '../../components/cinematic/Magnetic';
 import TextReveal from '../../components/cinematic/TextReveal';
 
@@ -222,31 +222,31 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0E0E0E] text-white overflow-hidden relative selection:bg-primary selection:text-black">
-      {/* 1. The "Breathing" 3D Background */}
-      <Space3D />
+    <div className="min-h-screen bg-[#020617] text-white overflow-hidden relative selection:bg-cyan-500 selection:text-black">
+      {/* 1. The 'System' Background (Blue Mana/Particles) */}
+      <SystemBackground />
 
-      {/* 2. Film Grain Overlay */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-50 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
+      {/* 2. System Interface Grain (Subtle) */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.02] z-50 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
 
       <Header user={playerData} onNavigate={handleNavigate} />
       
       <main className="container mx-auto px-4 py-8 space-y-12 relative z-10">
         
         {/* Welcome Section - Cinematic Intro */}
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 pb-6 border-b border-white/5">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 pb-6 border-b border-cyan-500/10">
           <div className="space-y-4">
             <TextReveal 
               text={`SYSTEM ONLINE: ${playerData?.name}`} 
-              className="text-4xl lg:text-6xl font-heading font-black tracking-tighter text-white"
+              className="text-4xl lg:text-6xl font-heading font-black tracking-tighter text-white drop-shadow-[0_0_10px_rgba(0,217,255,0.5)]"
             />
-            <div className="flex items-center space-x-6 text-gray-400 font-mono text-sm tracking-widest">
+            <div className="flex items-center space-x-6 text-cyan-400/80 font-mono text-sm tracking-widest">
               <div className="flex items-center space-x-2">
-                <Icon name="Calendar" size={14} className="text-primary" />
+                <Icon name="Calendar" size={14} className="text-cyan-400" />
                 <span>{formatDate(currentTime).toUpperCase()}</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Icon name="Clock" size={14} className="text-primary" />
+                <Icon name="Clock" size={14} className="text-cyan-400" />
                 <span>{formatTime(currentTime)}</span>
               </div>
             </div>
@@ -259,7 +259,7 @@ const Dashboard = () => {
                 onClick={handleViewLeaderboard}
                 iconName="Trophy"
                 iconPosition="left"
-                className="border-white/10 bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white backdrop-blur-md transition-all duration-300 font-mono text-xs uppercase tracking-widest"
+                className="border-cyan-500/20 bg-black/20 text-cyan-400 hover:bg-cyan-500/10 hover:text-cyan-300 hover:border-cyan-400/50 backdrop-blur-md transition-all duration-300 font-mono text-xs uppercase tracking-widest"
               >
                 Leaderboard
               </Button>
@@ -270,7 +270,7 @@ const Dashboard = () => {
                 onClick={handleCreateQuest}
                 iconName="Plus"
                 iconPosition="left"
-                className="bg-primary text-black font-bold hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--color-primary)] transition-all duration-300 font-mono text-xs uppercase tracking-widest px-8"
+                className="bg-cyan-500 text-black font-bold hover:bg-cyan-400 shadow-[0_0_20px_-5px_var(--color-primary)] transition-all duration-300 font-mono text-xs uppercase tracking-widest px-8"
               >
                 Initialize Quest
               </Button>
@@ -278,8 +278,14 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Player Stats Section - Glassmorphism Container */}
-        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-1 shadow-2xl overflow-hidden group hover:border-primary/30 transition-colors duration-500">
+        {/* Player Stats Section - System Box */}
+        <div className="backdrop-blur-xl bg-[#020617]/60 border border-cyan-500/20 rounded-sm p-1 shadow-[0_0_30px_-10px_rgba(0,217,255,0.15)] overflow-hidden group hover:border-cyan-400/50 transition-colors duration-500 relative">
+          {/* Decorative Corner Borders */}
+          <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-cyan-500"></div>
+          <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-cyan-500"></div>
+          <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-cyan-500"></div>
+          <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-cyan-500"></div>
+          
           <PlayerStats player={playerData} />
         </div>
 
@@ -288,12 +294,12 @@ const Dashboard = () => {
           {/* Quest List */}
           <div className="xl:col-span-2 space-y-6">
             <div className="flex items-center justify-between">
-               <h2 className="text-2xl font-heading font-bold tracking-tight text-white flex items-center gap-2">
-                 <span className="w-2 h-8 bg-primary block"></span>
+               <h2 className="text-2xl font-heading font-bold tracking-tight text-white flex items-center gap-2 drop-shadow-[0_0_5px_rgba(0,217,255,0.8)]">
+                 <span className="w-1.5 h-6 bg-cyan-500 block shadow-[0_0_10px_rgba(0,217,255,1)]"></span>
                  ACTIVE DIRECTIVES
                </h2>
             </div>
-            <div className="backdrop-blur-md bg-black/40 border border-white/5 rounded-xl overflow-hidden">
+            <div className="backdrop-blur-md bg-black/40 border border-white/5 rounded-xl overflow-hidden relative">
                <QuestList 
                  quests={questsData}
                  onCompleteQuest={handleCompleteQuest}
@@ -304,13 +310,13 @@ const Dashboard = () => {
 
           {/* Side Panel */}
           <div className="space-y-6">
-            <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-6 hover:border-white/20 transition-all duration-300">
+            <div className="backdrop-blur-lg bg-black/40 border border-white/5 rounded-xl p-6 hover:border-cyan-500/30 transition-all duration-300">
                <QuickStats stats={quickStatsData} />
             </div>
-            <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-6 hover:border-white/20 transition-all duration-300">
+            <div className="backdrop-blur-lg bg-black/40 border border-white/5 rounded-xl p-6 hover:border-cyan-500/30 transition-all duration-300">
                <RecentAchievements achievements={achievementsData} />
             </div>
-            <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-6 hover:border-white/20 transition-all duration-300">
+            <div className="backdrop-blur-lg bg-black/40 border border-white/5 rounded-xl p-6 hover:border-cyan-500/30 transition-all duration-300">
                <UpcomingReminders reminders={remindersData} />
             </div>
           </div>
