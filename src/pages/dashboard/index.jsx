@@ -9,11 +9,16 @@ import RecentAchievements from './components/RecentAchievements';
 import UpcomingReminders from './components/UpcomingReminders';
 import QuickStats from './components/QuickStats';
 
+// Cinematic Components
+import Space3D from '../../components/cinematic/Space3D';
+import Magnetic from '../../components/cinematic/Magnetic';
+import TextReveal from '../../components/cinematic/TextReveal';
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Mock player data
+  // Mock player data (same as before)
   const playerData = {
     name: "Shadow Hunter",
     level: 15,
@@ -32,7 +37,7 @@ const Dashboard = () => {
     ]
   };
 
-  // Mock quests data
+  // Mock quests data (same as before)
   const questsData = [
     {
       id: 1,
@@ -61,7 +66,7 @@ const Dashboard = () => {
     {
       id: 3,
       title: "Read Programming Book",
-      description: "Read at least 20 pages of \'Clean Code\' to improve software development skills.",
+      description: "Read at least 20 pages of 'Clean Code' to improve software development skills.",
       type: "daily",
       difficulty: "Normal",
       linkedAttributes: ["INT"],
@@ -96,7 +101,7 @@ const Dashboard = () => {
     }
   ];
 
-  // Mock achievements data
+  // Mock achievements data (same as before)
   const achievementsData = [
     {
       id: 1,
@@ -127,7 +132,7 @@ const Dashboard = () => {
     }
   ];
 
-  // Mock reminders data
+  // Mock reminders data (same as before)
   const remindersData = [
     {
       id: 1,
@@ -155,7 +160,7 @@ const Dashboard = () => {
     }
   ];
 
-  // Mock quick stats data
+  // Mock quick stats data (same as before)
   const quickStatsData = {
     totalQuests: 47,
     questsChange: 5,
@@ -180,12 +185,10 @@ const Dashboard = () => {
   }, []);
 
   const handleCompleteQuest = (questId) => {
-    // Navigate to quest completion modal
     navigate('/quest-completion-modal', { state: { questId } });
   };
 
   const handleEditQuest = (questId) => {
-    // Navigate to quest creation modal with edit mode
     navigate('/quest-creation-modal', { state: { questId, mode: 'edit' } });
   };
 
@@ -197,7 +200,6 @@ const Dashboard = () => {
     navigate('/leaderboard');
   };
 
-  // Add this handler function
   const handleNavigate = (path) => {
     navigate(path);
   };
@@ -220,110 +222,102 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#0E0E0E] text-white overflow-hidden relative selection:bg-primary selection:text-black">
+      {/* 1. The "Breathing" 3D Background */}
+      <Space3D />
+
+      {/* 2. Film Grain Overlay */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-50 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
+
       <Header user={playerData} onNavigate={handleNavigate} />
-      <main className="container mx-auto px-4 py-8 space-y-8">
-        {/* Welcome Section */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="space-y-2">
-            <h1 className="text-3xl lg:text-4xl font-heading font-bold text-text-primary">
-              Welcome back, <span className="text-primary text-glow">{playerData?.name}</span>!
-            </h1>
-            <div className="flex items-center space-x-4 text-text-secondary">
+      
+      <main className="container mx-auto px-4 py-8 space-y-12 relative z-10">
+        
+        {/* Welcome Section - Cinematic Intro */}
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 pb-6 border-b border-white/5">
+          <div className="space-y-4">
+            <TextReveal 
+              text={`SYSTEM ONLINE: ${playerData?.name}`} 
+              className="text-4xl lg:text-6xl font-heading font-black tracking-tighter text-white"
+            />
+            <div className="flex items-center space-x-6 text-gray-400 font-mono text-sm tracking-widest">
               <div className="flex items-center space-x-2">
-                <Icon name="Calendar" size={16} />
-                <span>{formatDate(currentTime)}</span>
+                <Icon name="Calendar" size={14} className="text-primary" />
+                <span>{formatDate(currentTime).toUpperCase()}</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Icon name="Clock" size={16} />
+                <Icon name="Clock" size={14} className="text-primary" />
                 <span>{formatTime(currentTime)}</span>
               </div>
             </div>
           </div>
           
           <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              onClick={handleViewLeaderboard}
-              iconName="Trophy"
-              iconPosition="left"
-              className="border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground"
-            >
-              Leaderboard
-            </Button>
-            <Button
-              variant="default"
-              onClick={handleCreateQuest}
-              iconName="Plus"
-              iconPosition="left"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow-primary"
-            >
-              Create New Quest
-            </Button>
+            <Magnetic>
+              <Button
+                variant="outline"
+                onClick={handleViewLeaderboard}
+                iconName="Trophy"
+                iconPosition="left"
+                className="border-white/10 bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white backdrop-blur-md transition-all duration-300 font-mono text-xs uppercase tracking-widest"
+              >
+                Leaderboard
+              </Button>
+            </Magnetic>
+            <Magnetic>
+              <Button
+                variant="default"
+                onClick={handleCreateQuest}
+                iconName="Plus"
+                iconPosition="left"
+                className="bg-primary text-black font-bold hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--color-primary)] transition-all duration-300 font-mono text-xs uppercase tracking-widest px-8"
+              >
+                Initialize Quest
+              </Button>
+            </Magnetic>
           </div>
         </div>
 
-        {/* Player Stats Section */}
-        <PlayerStats player={playerData} />
+        {/* Player Stats Section - Glassmorphism Container */}
+        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-1 shadow-2xl overflow-hidden group hover:border-primary/30 transition-colors duration-500">
+          <PlayerStats player={playerData} />
+        </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Quest List - Takes up 2 columns on xl screens */}
-          <div className="xl:col-span-2">
-            <QuestList 
-              quests={questsData}
-              onCompleteQuest={handleCompleteQuest}
-              onEditQuest={handleEditQuest}
-            />
-          </div>
-
-          {/* Side Panel - Takes up 1 column on xl screens */}
-          <div className="space-y-6">
-            <QuickStats stats={quickStatsData} />
-            <RecentAchievements achievements={achievementsData} />
-            <UpcomingReminders reminders={remindersData} />
-          </div>
-        </div>
-
-        {/* Quick Actions Footer */}
-        <div className="bg-surface rounded-lg border border-border p-6 shadow-elevation-2">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center">
-                <Icon name="Zap" size={20} className="text-background" />
-              </div>
-              <div>
-                <h3 className="text-lg font-heading font-bold text-text-primary">
-                  Ready to level up?
-                </h3>
-                <p className="text-text-secondary text-sm">
-                  Complete more quests to gain XP and advance your rank!
-                </p>
-              </div>
+          {/* Quest List */}
+          <div className="xl:col-span-2 space-y-6">
+            <div className="flex items-center justify-between">
+               <h2 className="text-2xl font-heading font-bold tracking-tight text-white flex items-center gap-2">
+                 <span className="w-2 h-8 bg-primary block"></span>
+                 ACTIVE DIRECTIVES
+               </h2>
             </div>
-            
-            <div className="flex items-center space-x-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                iconName="Settings"
-                className="text-text-secondary hover:text-primary"
-              >
-                Settings
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                iconName="User"
-                className="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
-              >
-                Profile
-              </Button>
+            <div className="backdrop-blur-md bg-black/40 border border-white/5 rounded-xl overflow-hidden">
+               <QuestList 
+                 quests={questsData}
+                 onCompleteQuest={handleCompleteQuest}
+                 onEditQuest={handleEditQuest}
+               />
+            </div>
+          </div>
+
+          {/* Side Panel */}
+          <div className="space-y-6">
+            <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-6 hover:border-white/20 transition-all duration-300">
+               <QuickStats stats={quickStatsData} />
+            </div>
+            <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-6 hover:border-white/20 transition-all duration-300">
+               <RecentAchievements achievements={achievementsData} />
+            </div>
+            <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-6 hover:border-white/20 transition-all duration-300">
+               <UpcomingReminders reminders={remindersData} />
             </div>
           </div>
         </div>
       </main>
-      {/* Mobile spacing for bottom navigation */}
+      
+      {/* Mobile spacing */}
       <div className="h-20 md:hidden"></div>
     </div>
   );
