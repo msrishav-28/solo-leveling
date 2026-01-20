@@ -5,13 +5,19 @@
 
 ![Project Banner](public/og-image.png)
 
-## ⚡ Overview
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+
+## Overview
 
 **Solo Leveling** is a gamified productivity application inspired by the *Solo Leveling* manhwa. It transforms mundane tasks into quests, tracks your "Hunter" progression through XP and leveling, and provides detailed analytics on your personal growth.
 
 Built with a **"Shadow Monarch" Visual DNA**, this isn't just a todo list—it's a cinematic interface for your life.
 
-## 🚀 Key Features
+## Key Features
 
 - **System-Based Progression**: Earn XP, level up, and increase your Rank (E-Rank to S-Rank).
 - **Attribute System**: visualized stats for Strength, Intelligence, Constitution, etc.
@@ -19,22 +25,7 @@ Built with a **"Shadow Monarch" Visual DNA**, this isn't just a todo list—it's
 - **Shadow Army**: (Planned) Visual representations of completed major milestones.
 - **Visuals**: Dark mode default, neon accents, glassmorphism, and smooth Framer Motion animations.
 
-## 🛠️ Tech Stack
-
-### Frontend (The System Interface)
-- **Framework**: [React 18](https://reactjs.org/) + [Vite](https://vitejs.dev/)
-- **Styling**: [TailwindCSS](https://tailwindcss.com/) + Custom "Shadow Monarch" Design System
-- **Animation**: [Framer Motion](https://www.framer.com/motion/)
-- **State**: React Hooks (Local) + (Planned) Redux Toolkit
-- **Icons**: Lucide React
-
-### Backend (The World System)
-- **Core**: [Supabase](https://supabase.com/) (PostgreSQL)
-- **Auth**: Supabase Auth (Email/Password + OAuth)
-- **Database**: PostgreSQL with Row Level Security (RLS)
-- **Real-time**: Supabase Subscriptions (planned for notifications)
-
-## 🏁 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js v16+
@@ -66,7 +57,7 @@ Built with a **"Shadow Monarch" Visual DNA**, this isn't just a todo list—it's
    npm run dev
    ```
 
-## 📚 Documentation
+## Documentation
 
 For deep dives into the system architecture:
 
@@ -74,7 +65,7 @@ For deep dives into the system architecture:
 - **[Frontend Architecture](docs/FRONTEND_DOCS.md)**: Component structure, styling guidelines, and state management.
 - **[Contributing Guide](CONTRIBUTING.md)**: How to contribute to the codebase.
 
-## 🎨 Design Philosophy
+## Design Philosophy
 
 We strictly adhere to the **Shadow Monarch Visual DNA**:
 - **Palette**: Midnight Blue, Electric Purple, Neon Blue.

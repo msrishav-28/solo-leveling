@@ -3,7 +3,7 @@
 **"The weak allow themselves to be devoured. The strong devour."**  
 We welcome other Hunters to help build the ultimate progression system. Here is how you can join the raid.
 
-## 🔧 Development Setup
+## Development Setup
 
 1.  **Fork & Clone**: Fork the repository and clone it locally.
 2.  **Dependencies**: Run `npm install` to grab all required artifacts.
@@ -12,7 +12,7 @@ We welcome other Hunters to help build the ultimate progression system. Here is 
     *   Run the SQL found in `schema.sql` in your Supabase SQL Editor to set up the tables.
     *   Add your credentials to `.env`.
 
-## 📐 Code Style & Visual DNA
+## Code Style & Visual DNA
 
 **CRITICAL**: This project relies heavily on a specific aesthetic defined in **`SHADOW_MONARCH_VISUAL_DNA.md`**.
 
@@ -25,13 +25,13 @@ We welcome other Hunters to help build the ultimate progression system. Here is 
 *   **Props**: Destructure props clearly.
 *   **Imports**: Group imports: React -> Library -> Internal Components -> Styles/Assets.
 
-## 📝 Pull Request Process
+## Pull Request Process
 
 1.  **Branching**: specific branches please (e.g., `feature/quest-board-v2`, `fix/login-glitch`).
 2.  **Commits**: Conventional Commits style (`feat: add xp bar`, `fix: resolve overflow`).
 3.  **Visuals**: If you change the UI, **you must attach a screenshot or GIF** to your PR. The System needs to see the changes.
 
-## 🐛 Reporting Bugs
+## Reporting Bugs
 
 If you encounter a "System Error" (bug):
 1.  Check existing Issues.
@@ -40,6 +40,6 @@ If you encounter a "System Error" (bug):
     *   **Reproduction**: How do we break it too?
     *   **Environment**: Browser, Device, OS.
 
-## 📜 License
+## License
 
 [MIT](LICENSE) - Do whatever you want, just don't stop leveling up.

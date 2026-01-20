@@ -3,7 +3,7 @@
 > **"Status Window: Open."**  
 > This document details the client-side architecture of Solo Leveling.
 
-## 🎨 The Shadow Monarch Design System
+## The Shadow Monarch Design System
 
 The UI is not just "Dark Mode"; it is a "System Interface". We prioritize immersion over standard material design patterns.
 
@@ -15,7 +15,7 @@ The UI is not just "Dark Mode"; it is a "System Interface". We prioritize immers
 
 **Reference**: See `SHADOW_MONARCH_VISUAL_DNA.md` for exact hex codes and typography rules.
 
-## 🧩 Component Architecture
+## Component Architecture
 
 We follow a typical React structure, but simplified for clarity.
 
@@ -42,7 +42,7 @@ A mandatory element on the dashboard.
 -   **Behavior**: Fills with a "flash" animation (Framer Motion).
 -   **Visual**: Gradient Cyan fill.
 
-## ⚡ State Management
+## State Management
 
 ### current: Local State + Context
 For the MVP, we use React `useState` and `useContext` for:
@@ -52,7 +52,7 @@ For the MVP, we use React `useState` and `useContext` for:
 ### Planned: Redux Toolkit
 As the "System" grows (Inventory, Guilds, Raid Parties), we will migrate global state to Redux Toolkit to avoid prop-drilling hell.
 
-## 🛣️ Routing
+## Routing
 
 We use **React Router v6**.
 
@@ -61,7 +61,7 @@ We use **React Router v6**.
 -   `/profile`: Stats and attribute distribution.
 -   `/inventory`: (Planned) Item management.
 
-## 🎭 Animations
+## Animations
 
 All animations use **Framer Motion**.
 

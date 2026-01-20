@@ -4,7 +4,7 @@
 > This document outlines the **Server-Authoritative** logic, database schema, and security protocols that govern Solo Leveling.
 > **All progression logic (XP, Leveling) lives on the database to prevent client-side exploitation.**
 
-## 🏗️ Core Architecture
+## Core Architecture
 
 The backend is built on **Supabase**, utilizing its suite of tools to provide a "Serverless" yet powerful backend:
 
@@ -13,7 +13,7 @@ The backend is built on **Supabase**, utilizing its suite of tools to provide a 
 -   **Security**: Row Level Security (RLS) policies
 -   **API**: Auto-generated REST implementation via PostgREST
 
-## 🗄️ Database Schema
+## Database Schema
 
 The database models the User's "Hunter" status and their Quest log.
 
@@ -50,7 +50,7 @@ A history of completed quests for analytics and streaks.
 | `xp_gained` | `int` | Actual XP awarded (base + modifiers) |
 | `completed_at` | `timestamp` | Time of completion |
 
-## 🛡️ Security Policies (RLS)
+## Security Policies (RLS)
 
 We strictly enforce **Row Level Security**. No data is exposed without proper authorization.
 
@@ -61,7 +61,7 @@ We strictly enforce **Row Level Security**. No data is exposed without proper au
 ### Quests & Completions
 -   **CRUD**: Users have full access to create, read, update, and delete *only* rows where `user_id` matches their authenticated UID.
 
-## 🔌 API Interaction
+## API Interaction
 
 We interact with the database using the **Supabase JavaScript Client** (`@supabase/supabase-js`).
 
