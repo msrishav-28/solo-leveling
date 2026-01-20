@@ -1,107 +1,89 @@
-# React
+# Solo Leveling
 
-A modern React-based project utilizing the latest frontend technologies and tools for building responsive web applications.
+> **"A hunter who doesn't grow is just prey."**  
+> Turn your daily life into a generic RPG? No. Turn it into a **Class S** progression system.
 
-## 🚀 Features
+![Project Banner](public/og-image.png)
 
-- **React 18** - React version with improved rendering and concurrent features
-- **Vite** - Lightning-fast build tool and development server
-- **Redux Toolkit** - State management with simplified Redux setup
-- **TailwindCSS** - Utility-first CSS framework with extensive customization
-- **React Router v6** - Declarative routing for React applications
-- **Data Visualization** - Integrated D3.js and Recharts for powerful data visualization
-- **Form Management** - React Hook Form for efficient form handling
-- **Animation** - Framer Motion for smooth UI animations
-- **Testing** - Jest and React Testing Library setup
+## ⚡ Overview
 
-## 📋 Prerequisites
+**Solo Leveling** is a gamified productivity application inspired by the *Solo Leveling* manhwa. It transforms mundane tasks into quests, tracks your "Hunter" progression through XP and leveling, and provides detailed analytics on your personal growth.
 
-- Node.js (v14.x or higher)
+Built with a **"Shadow Monarch" Visual DNA**, this isn't just a todo list—it's a cinematic interface for your life.
+
+## 🚀 Key Features
+
+- **System-Based Progression**: Earn XP, level up, and increase your Rank (E-Rank to S-Rank).
+- **Attribute System**: visualized stats for Strength, Intelligence, Constitution, etc.
+- **Quest Board**: Daily, Weekly, and One-time quests with difficulty ratings.
+- **Shadow Army**: (Planned) Visual representations of completed major milestones.
+- **Visuals**: Dark mode default, neon accents, glassmorphism, and smooth Framer Motion animations.
+
+## 🛠️ Tech Stack
+
+### Frontend (The System Interface)
+- **Framework**: [React 18](https://reactjs.org/) + [Vite](https://vitejs.dev/)
+- **Styling**: [TailwindCSS](https://tailwindcss.com/) + Custom "Shadow Monarch" Design System
+- **Animation**: [Framer Motion](https://www.framer.com/motion/)
+- **State**: React Hooks (Local) + (Planned) Redux Toolkit
+- **Icons**: Lucide React
+
+### Backend (The World System)
+- **Core**: [Supabase](https://supabase.com/) (PostgreSQL)
+- **Auth**: Supabase Auth (Email/Password + OAuth)
+- **Database**: PostgreSQL with Row Level Security (RLS)
+- **Real-time**: Supabase Subscriptions (planned for notifications)
+
+## 🏁 Quick Start
+
+### Prerequisites
+- Node.js v16+
 - npm or yarn
+- A Supabase project (for backend features)
 
-## 🛠️ Installation
+### Installation
 
-1. Install dependencies:
+1. **Clone the generic interface:**
+   ```bash
+   git clone https://github.com/yourusername/solo-leveling-habit-tracker.git
+   cd solo-leveling-habit-tracker
+   ```
+
+2. **Install modules:**
    ```bash
    npm install
-   # or
-   yarn install
    ```
-   
-2. Start the development server:
+
+3. **Environment Setup:**
+   Create a `.env` file in the root directory:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. **Awaken the System:**
    ```bash
-   npm start
-   # or
-   yarn start
+   npm run dev
    ```
 
-## 📁 Project Structure
+## 📚 Documentation
 
-```
-react_app/
-├── public/             # Static assets
-├── src/
-│   ├── components/     # Reusable UI components
-│   ├── pages/          # Page components
-│   ├── styles/         # Global styles and Tailwind configuration
-│   ├── App.jsx         # Main application component
-│   ├── Routes.jsx      # Application routes
-│   └── index.jsx       # Application entry point
-├── .env                # Environment variables
-├── index.html          # HTML template
-├── package.json        # Project dependencies and scripts
-├── tailwind.config.js  # Tailwind CSS configuration
-└── vite.config.js      # Vite configuration
-```
+For deep dives into the system architecture:
 
-## 🧩 Adding Routes
+- **[Backend Architecture](docs/BACKEND_DOCS.md)**: Database schema, RLS policies, and API interaction.
+- **[Frontend Architecture](docs/FRONTEND_DOCS.md)**: Component structure, styling guidelines, and state management.
+- **[Contributing Guide](CONTRIBUTING.md)**: How to contribute to the codebase.
 
-To add new routes to the application, update the `Routes.jsx` file:
+## 🎨 Design Philosophy
 
-```jsx
-import { useRoutes } from "react-router-dom";
-import HomePage from "pages/HomePage";
-import AboutPage from "pages/AboutPage";
+We strictly adhere to the **Shadow Monarch Visual DNA**:
+- **Palette**: Midnight Blue, Electric Purple, Neon Blue.
+- **Typography**: Clean, uppercase headers, monospace data points.
+- **Feeling**: "System" interface—crisp, responsive, dangerous.
 
-const ProjectRoutes = () => {
-  let element = useRoutes([
-    { path: "/", element: <HomePage /> },
-    { path: "/about", element: <AboutPage /> },
-    // Add more routes as needed
-  ]);
+See `SHADOW_MONARCH_VISUAL_DNA.md` for the full style guide.
 
-  return element;
-};
-```
+---
 
-## 🎨 Styling
-
-This project uses Tailwind CSS for styling. The configuration includes:
-
-- Forms plugin for form styling
-- Typography plugin for text styling
-- Aspect ratio plugin for responsive elements
-- Container queries for component-specific responsive design
-- Fluid typography for responsive text
-- Animation utilities
-
-## 📱 Responsive Design
-
-The app is built with responsive design using Tailwind CSS breakpoints.
-
-
-## 📦 Deployment
-
-Build the application for production:
-
-```bash
-npm run build
-```
-
-## 🙏 Acknowledgments
-
-- Built with [Rocket.new](https://rocket.new)
-- Powered by React and Vite
-- Styled with Tailwind CSS
-
-Built with ❤️ on Rocket.new
+**System Notification:**  
+*You have acquired a new skill: [Contributor].*

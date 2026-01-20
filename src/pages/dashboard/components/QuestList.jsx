@@ -1,35 +1,35 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
+import SystemBox from '../../../components/cinematic/SystemBox';
+import SlashEffect from '../../../components/cinematic/SlashEffect';
 
 const QuestList = ({ quests, onCompleteQuest, onEditQuest }) => {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState('all');
+  const [slashingId, setSlashingId] = useState(null);
+
+  const handleSlash = (id) => {
+    setSlashingId(id);
+    // Wait for animation to finish before calling actual complete
+    setTimeout(() => {
+      onCompleteQuest(id);
+      setSlashingId(null);
+    }, 600);
+  };
+
+  const handleEnterDungeon = (id) => {
+    navigate(`/dungeon/${id}`);
+  };
 
   const getDifficultyColor = (difficulty) => {
     const colors = {
-      'Easy': '#00ff00',
-      'Normal': '#00d9ff',
-      'Hard': '#ff0033'
+      'Easy': 'text-green-400',
+      'Normal': 'text-cyan-400',
+      'Hard': 'text-red-500'
     };
-    return colors?.[difficulty] || '#00d9ff';
-  };
-
-  const getDifficultyMultiplier = (difficulty) => {
-    const multipliers = {
-      'Easy': '0.7x',
-      'Normal': '1.0x',
-      'Hard': '1.5x'
-    };
-    return multipliers?.[difficulty] || '1.0x';
-  };
-
-  const getQuestTypeIcon = (type) => {
-    const icons = {
-      'daily': 'Calendar',
-      'recurring': 'RotateCcw',
-      'one-time': 'Target'
-    };
-    return icons?.[type] || 'Target';
+    return colors?.[difficulty] || 'text-cyan-400';
   };
 
   const filteredQuests = quests?.filter(quest => {
@@ -40,210 +40,107 @@ const QuestList = ({ quests, onCompleteQuest, onEditQuest }) => {
   });
 
   const filterOptions = [
-    { value: 'all', label: 'All Quests', icon: 'List' },
-    { value: 'daily', label: 'Daily', icon: 'Calendar' },
-    { value: 'recurring', label: 'Recurring', icon: 'RotateCcw' },
-    { value: 'one-time', label: 'One-time', icon: 'Target' },
-    { value: 'completed', label: 'Completed', icon: 'CheckCircle' },
-    { value: 'pending', label: 'Pending', icon: 'Clock' }
+    { value: 'all', label: 'ALL FILES' },
+    { value: 'daily', label: 'DAILY' },
+    { value: 'recurring', label: 'RECURRING' },
+    { value: 'one-time', label: 'SPECIAL' }
   ];
 
   return (
-    <div className="bg-surface rounded-lg border border-border shadow-elevation-2">
-      {/* Header */}
-      <div className="p-6 border-b border-border">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-heading font-bold text-text-primary">
-            Active Quests
-          </h3>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-text-secondary">
-              {filteredQuests?.length} quest{filteredQuests?.length !== 1 ? 's' : ''}
-            </span>
-            <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-          </div>
-        </div>
-
-        {/* Filter Tabs */}
-        <div className="flex flex-wrap gap-2">
-          {filterOptions?.map((option) => (
+    <div className="w-full">
+      {/* Header / Filter Bar */}
+      <div className="flex items-center justify-between mb-6 border-b border-primary/20 pb-4">
+        <div className="flex gap-4">
+          {filterOptions.map(opt => (
             <button
-              key={option?.value}
-              onClick={() => setFilter(option?.value)}
-              className={`
-                flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium
-                transition-all duration-300 hover:scale-105
-                ${filter === option?.value
-                  ? 'bg-primary text-primary-foreground shadow-glow-primary'
-                  : 'bg-muted text-text-secondary hover:bg-primary/10 hover:text-primary'
-                }
-              `}
+              key={opt.value}
+              onClick={() => setFilter(opt.value)}
+              className={`font-mono text-xs uppercase tracking-widest px-4 py-2 hover:text-primary transition-colors ${filter === opt.value ? 'text-primary border-b border-primary' : 'text-muted-foreground'}`}
             >
-              <Icon name={option?.icon} size={16} />
-              <span>{option?.label}</span>
+              [{opt.label}]
             </button>
           ))}
         </div>
+        <div className="font-mono text-xs text-primary/60">
+          ACTIVE_OBJECTIVES: {filteredQuests?.length || 0}
+        </div>
       </div>
-      {/* Quest Items */}
-      <div className="p-6">
-        {filteredQuests?.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-              <Icon name="Search" size={24} className="text-text-secondary" />
-            </div>
-            <h4 className="text-lg font-medium text-text-primary mb-2">
-              No quests found
-            </h4>
-            <p className="text-text-secondary">
-              {filter === 'all' 
-                ? "Create your first quest to start your journey!"
-                : `No ${filter} quests available.`
-              }
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredQuests?.map((quest) => (
-              <div
-                key={quest?.id}
-                className={`
-                  p-4 rounded-lg border transition-all duration-300 hover:scale-[1.02]
-                  ${quest?.completed
-                    ? 'bg-success/10 border-success/20 opacity-75' :'bg-background border-border hover:border-primary/30 hover:shadow-glow-primary'
-                  }
-                `}
+
+      <div className="flex flex-col gap-4">
+        <AnimatePresence mode="popLayout">
+          {filteredQuests?.map((quest) => (
+            <motion.div
+              key={quest.id}
+              layout
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            >
+              <SystemBox
+                className={`p-6 flex items-center justify-between overflow-hidden ${quest.completed ? 'opacity-50 grayscale' : ''}`}
+                variant={quest.completed ? 'primary' : (quest.difficulty === 'Hard' ? 'danger' : 'primary')}
+                animated={!quest.completed}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4 flex-1">
-                    {/* Completion Checkbox */}
-                    <button
-                      onClick={() => onCompleteQuest(quest?.id)}
-                      disabled={quest?.completed}
-                      className={`
-                        w-6 h-6 rounded-full border-2 flex items-center justify-center
-                        transition-all duration-300 hover:scale-110
-                        ${quest?.completed
-                          ? 'bg-success border-success text-background' :'border-primary hover:border-primary hover:bg-primary/10'
-                        }
-                      `}
-                    >
-                      {quest?.completed && <Icon name="Check" size={14} />}
-                    </button>
+                {/* Slash Effect Overlay */}
+                {slashingId === quest.id && <SlashEffect />}
 
-                    {/* Quest Info */}
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h4 className={`text-lg font-medium ${quest?.completed ? 'text-text-secondary line-through' : 'text-text-primary'}`}>
-                          {quest?.title}
-                        </h4>
-                        
-                        {/* Quest Type Badge */}
-                        <div className="flex items-center space-x-1 px-2 py-1 bg-muted rounded-full">
-                          <Icon name={getQuestTypeIcon(quest?.type)} size={12} className="text-text-secondary" />
-                          <span className="text-xs text-text-secondary capitalize">
-                            {quest?.type}
-                          </span>
-                        </div>
+                <div className="flex items-start gap-4 flex-1">
+                  {/* Type Icon */}
+                  <div className="w-10 h-10 flex items-center justify-center border border-primary/20 bg-primary/5">
+                    <Icon name="Target" className="text-primary w-5 h-5" />
+                  </div>
 
-                        {/* Difficulty Badge */}
-                        <div 
-                          className="px-2 py-1 rounded-full text-xs font-bold"
-                          style={{ 
-                            backgroundColor: `${getDifficultyColor(quest?.difficulty)}20`,
-                            color: getDifficultyColor(quest?.difficulty)
-                          }}
-                        >
-                          {quest?.difficulty} ({getDifficultyMultiplier(quest?.difficulty)})
-                        </div>
-                      </div>
-
-                      {quest?.description && (
-                        <p className="text-sm text-text-secondary mb-3">
-                          {quest?.description}
-                        </p>
-                      )}
-
-                      {/* Quest Details */}
-                      <div className="flex items-center space-x-6 text-sm">
-                        {/* Linked Attributes */}
-                        <div className="flex items-center space-x-2">
-                          <Icon name="Zap" size={14} className="text-accent" />
-                          <span className="text-text-secondary">Attributes:</span>
-                          <div className="flex space-x-1">
-                            {quest?.linkedAttributes?.map((attr, index) => (
-                              <span key={index} className="text-primary font-medium">
-                                {attr}{index < quest?.linkedAttributes?.length - 1 ? ',' : ''}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* XP Potential */}
-                        <div className="flex items-center space-x-2">
-                          <Icon name="Star" size={14} className="text-accent" />
-                          <span className="text-text-secondary">XP:</span>
-                          <span className="text-accent font-bold font-mono">
-                            +{quest?.xpReward}
-                          </span>
-                        </div>
-
-                        {/* Time Tracking */}
-                        {quest?.timeTracked && (
-                          <div className="flex items-center space-x-2">
-                            <Icon name="Clock" size={14} className="text-text-secondary" />
-                            <span className="text-text-secondary">
-                              {quest?.timeTracked}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Quest Schedule */}
-                      {quest?.schedule && (
-                        <div className="flex items-center space-x-2 mt-2 text-xs text-text-secondary">
-                          <Icon name="Calendar" size={12} />
-                          <span>{quest?.schedule}</span>
-                        </div>
-                      )}
+                  <div className="flex flex-col gap-1">
+                    <h4 className="text-xl font-heading text-white tracking-wide">
+                      {quest.title}
+                    </h4>
+                    <div className="flex items-center gap-4 text-xs font-mono text-muted-foreground">
+                      <span className={`${getDifficultyColor(quest.difficulty)} uppercase`}>
+                        RANK: {quest.difficulty}
+                      </span>
+                      <span>XP: +{quest.xpReward}</span>
+                      {quest.time && <span>TIME: {quest.time}</span>}
                     </div>
                   </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex items-center space-x-2 ml-4">
-                    {!quest?.completed && (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEditQuest(quest?.id)}
-                          iconName="Edit"
-                          className="text-text-secondary hover:text-primary"
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onCompleteQuest(quest?.id)}
-                          iconName="Play"
-                          className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                        >
-                          Start
-                        </Button>
-                      </>
-                    )}
-                    
-                    {quest?.completed && (
-                      <div className="flex items-center space-x-2 text-success">
-                        <Icon name="CheckCircle" size={16} />
-                        <span className="text-sm font-medium">Completed</span>
-                      </div>
-                    )}
-                  </div>
                 </div>
-              </div>
-            ))}
+
+                {/* Interaction Area */}
+                {!quest.completed && (
+                  <div className="flex items-center -mr-6 -my-6 h-[calc(100%+3rem)]">
+                    {quest.difficulty === 'Hard' && (
+                      <button
+                        onClick={() => handleEnterDungeon(quest.id)}
+                        className="h-full px-6 flex flex-col items-center justify-center gap-1 border-l border-red-500/20 hover:bg-red-500/10 transition-colors group/raid"
+                      >
+                        <span className="text-[10px] font-mono text-red-400 group-hover/raid:text-red-300">RAID</span>
+                        <Icon name="Skull" className="w-5 h-5 text-red-500 group-hover/raid:animate-pulse" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleSlash(quest.id)}
+                      className="h-full px-6 hover:bg-primary/10 transition-colors flex flex-col items-center justify-center gap-1 border-l border-primary/20 group/exec"
+                    >
+                      <span className="text-[10px] font-mono text-primary/60 group-hover/exec:text-primary">EXECUTE</span>
+                      <Icon name="Sword" className="w-6 h-6 text-primary group-hover/exec:rotate-45 transition-transform duration-300" />
+                    </button>
+                  </div>
+                )}
+
+                {quest.completed && (
+                  <div className="px-6 py-2 border border-primary/50 text-primary font-mono text-xs">
+                    [COMPLETE]
+                  </div>
+                )}
+
+              </SystemBox>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        {filteredQuests?.length === 0 && (
+          <div className="text-center py-12 border border-dashed border-white/10">
+            <p className="font-mono text-muted-foreground">NO_ACTIVE_QUESTS_FOUND</p>
           </div>
         )}
       </div>

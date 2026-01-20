@@ -1,241 +1,117 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Header from '../../components/ui/Header';
-import XPGainDisplay from './components/XPGainDisplay';
-import AttributeRings from './components/AttributeRings';
-import RankProgressIndicator from './components/RankProgressIndicator';
-import AchievementNotifications from './components/AchievementNotifications';
-import ActionButtons from './components/ActionButtons';
+import { motion } from 'framer-motion';
+import SystemBackground from '../../components/cinematic/SystemBackground';
+import SystemBox from '../../components/cinematic/SystemBox';
+import TextReveal from '../../components/cinematic/TextReveal';
+import Magnetic from '../../components/cinematic/Magnetic';
 import Icon from '../../components/AppIcon';
+import Button from '../../components/ui/Button';
+import useSystemSound from '../../hooks/useSystemSound';
 
 const RewardScreen = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const [animationComplete, setAnimationComplete] = useState(false);
+  const location = useLocation();
+  const { playLevelUp } = useSystemSound();
+
+  // Mock Data from navigation
+  const { quest, totalXP } = location.state || { quest: { title: "Daily Quest" }, totalXP: 200 };
+
   const [showContent, setShowContent] = useState(false);
 
-  // Mock reward data - in real app this would come from quest completion
-  const mockRewardData = {
-    questTitle: "Morning Meditation",
-    questDifficulty: "Normal",
-    baseXP: 100,
-    multiplier: 1.0,
-    streakBonus: 25,
-    timeBonus: 15,
-    totalXP: 140,
-    attributeGains: {
-      constitution: 2,
-      charisma: 1,
-      intelligence: 1
-    },
-    playerAttributes: {
-      strength: 45,
-      intelligence: 62,
-      constitution: 58,
-      dexterity: 41,
-      charisma: 39,
-      luck: 33
-    },
-    previousRank: "D",
-    currentRank: "D",
-    newRank: "C",
-    isRankUp: false,
-    newAchievements: [
-      {
-        id: 1,
-        title: "Mindful Warrior",
-        description: "Complete 7 consecutive meditation sessions",
-        type: "streak",
-        rarity: "rare",
-        rewards: {
-          xp: 50,
-          title: "The Centered"
-        },
-        progress: {
-          current: 7,
-          target: 7
-        }
-      },
-      {
-        id: 2,
-        title: "Early Bird",
-        description: "Complete morning quests for 30 days",
-        type: "consistency",
-        rarity: "epic",
-        rewards: {
-          xp: 100
-        },
-        progress: {
-          current: 30,
-          target: 30
-        }
-      }
-    ],
-    playerStats: {
-      totalXP: 15420,
-      currentStreak: 12,
-      completedQuests: 89,
-      currentRank: "D"
-    }
-  };
-
-  // Get reward data from location state or use mock data
-  const rewardData = location?.state?.rewardData || mockRewardData;
-
   useEffect(() => {
-    // Show content after initial mount
-    const timer1 = setTimeout(() => setShowContent(true), 300);
-    
-    // Mark animation as complete after all animations
-    const timer2 = setTimeout(() => setAnimationComplete(true), 4000);
-    
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, []);
+    playLevelUp();
+    setTimeout(() => setShowContent(true), 500);
+  }, [playLevelUp]);
 
-  const handleContinue = () => {
-    navigate('/dashboard', { 
-      state: { 
-        fromReward: true,
-        updatedStats: rewardData?.playerStats 
-      }
-    });
-  };
-
-  const handleShare = () => {
-    const shareText = `🎉 Just completed "${rewardData?.questTitle}" and gained ${rewardData?.totalXP} XP!\n\n💪 Growing stronger every day with Solo Leveling Habit Tracker!\n\n#SoloLeveling #HabitTracker #LevelUp #PersonalGrowth`;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: 'Solo Leveling Achievement',
-        text: shareText,
-        url: window.location?.origin
-      })?.catch(console.error);
-    } else {
-      navigator.clipboard?.writeText(shareText)?.then(() => {
-        // Show success feedback
-        console.log('Achievement copied to clipboard!');
-      })?.catch(console.error);
-    }
-  };
-
-  const user = {
-    name: "Shadow Hunter",
-    level: 24,
-    rank: rewardData?.currentRank
-  };
+  const stats = [
+    { label: "STR", value: "+2", icon: "Sword" },
+    { label: "AGI", value: "+1", icon: "Zap" },
+    { label: "VIT", value: "+1", icon: "Heart" },
+  ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header user={user} onNavigate={navigate} />
-      {/* Reward Screen Overlay */}
-      <div className={`
-        fixed inset-0 z-40 bg-background/95 backdrop-blur-lg
-        transition-opacity duration-500
-        ${showContent ? 'opacity-100' : 'opacity-0'}
-      `}>
-        <div className="min-h-screen flex flex-col">
-          {/* Header Section */}
-          <div className="flex-shrink-0 pt-24 pb-8">
-            <div className="text-center space-y-4">
-              <div className={`
-                transition-all duration-1000 transform
-                ${showContent ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}
-              `}>
-                <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary text-glow mb-2">
-                  Quest Complete!
-                </h1>
-                <p className="text-xl text-text-secondary">
-                  "{rewardData?.questTitle}" has been conquered
-                </p>
-              </div>
-              
-              {/* Celebration Icons */}
-              <div className="flex items-center justify-center space-x-4">
-                {[...Array(5)]?.map((_, i) => (
-                  <Icon
-                    key={i}
-                    name="Star"
-                    size={24}
-                    className={`
-                      text-accent animate-float
-                      ${showContent ? 'opacity-100' : 'opacity-0'}
-                    `}
-                    style={{ animationDelay: `${i * 200}ms` }}
-                  />
-                ))}
+    <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center p-4">
+      <SystemBackground />
+      <div className="bg-noise" />
+
+      {/* Ambient Gold Glow */}
+      <div className="absolute inset-0 bg-yellow-500/5 mix-blend-overlay pointer-events-none" />
+
+      <div className="relative z-10 w-full max-w-lg">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, ease: "backOut" }}
+        >
+          <SystemBox variant="gold" className="text-center p-8 md:p-12 space-y-8 bg-black/80 shadow-[0_0_100px_rgba(234,179,8,0.2)]">
+            {/* Header */}
+            <div className="space-y-4">
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-yellow-500 font-mono tracking-[0.5em] text-sm uppercase"
+              >
+                SYSTEM NOTIFICATION
+              </motion.div>
+              <h1 className="text-5xl md:text-6xl font-heading font-black text-white italic tracking-tighter drop-shadow-[0_0_20px_rgba(234,179,8,0.8)]">
+                LEVEL UP!
+              </h1>
+            </div>
+
+            {/* XP Circle */}
+            <div className="relative w-40 h-40 mx-auto flex items-center justify-center">
+              <motion.div
+                className="absolute inset-0 border-4 border-yellow-500/30 rounded-full"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.5 }}
+              />
+              <motion.div
+                className="absolute inset-0 border-4 border-yellow-500 rounded-full border-t-transparent animate-spin-slow"
+              />
+              <div className="text-center">
+                <div className="text-4xl font-black text-white">{totalXP}</div>
+                <div className="text-xs font-mono text-yellow-500 uppercase">XP GAINED</div>
               </div>
             </div>
-          </div>
-          
-          {/* Main Content */}
-          <div className="flex-1 overflow-y-auto px-4 pb-8">
-            <div className="max-w-4xl mx-auto space-y-12">
-              {/* XP Gain Display */}
-              <XPGainDisplay
-                baseXP={rewardData?.baseXP}
-                multiplier={rewardData?.multiplier}
-                streakBonus={rewardData?.streakBonus}
-                timeBonus={rewardData?.timeBonus}
-                totalXP={rewardData?.totalXP}
-                difficulty={rewardData?.questDifficulty}
-              />
-              
-              {/* Attribute Growth */}
-              <AttributeRings
-                attributeGains={rewardData?.attributeGains}
-                playerAttributes={rewardData?.playerAttributes}
-              />
-              
-              {/* Rank Up Indicator */}
-              {rewardData?.isRankUp && (
-                <RankProgressIndicator
-                  currentRank={rewardData?.previousRank}
-                  newRank={rewardData?.newRank}
-                  isRankUp={rewardData?.isRankUp}
-                />
-              )}
-              
-              {/* Achievement Notifications */}
-              <AchievementNotifications
-                newAchievements={rewardData?.newAchievements}
-              />
-              
-              {/* Action Buttons */}
-              <ActionButtons
-                questData={rewardData}
-                onShare={handleShare}
-                onContinue={handleContinue}
-              />
+
+            {/* Stat Gains */}
+            <div className="grid grid-cols-3 gap-4">
+              {stats.map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.8 + (i * 0.1) }}
+                  className="p-3 border border-yellow-500/30 bg-yellow-900/10 rounded"
+                >
+                  <Icon name={stat.icon} className="w-5 h-5 text-yellow-500 mx-auto mb-2" />
+                  <div className="text-xl font-bold text-white">{stat.value}</div>
+                  <div className="text-[10px] font-mono text-yellow-500/60">{stat.label}</div>
+                </motion.div>
+              ))}
             </div>
-          </div>
-        </div>
-        
-        {/* Background Effects */}
-        <div className="fixed inset-0 pointer-events-none overflow-hidden">
-          {/* Floating Particles */}
-          {[...Array(20)]?.map((_, i) => (
-            <div
-              key={i}
-              className={`
-                absolute w-2 h-2 bg-primary rounded-full animate-float
-                ${showContent ? 'opacity-30' : 'opacity-0'}
-              `}
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3000}ms`,
-                animationDuration: `${3000 + Math.random() * 2000}ms`
-              }}
-            />
-          ))}
-          
-          {/* Glow Effects */}
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        </div>
+
+            {/* Message */}
+            <div className="pt-6 border-t border-yellow-500/20">
+              <p className="font-mono text-sm text-yellow-100/80">
+                <TextReveal text={`"You have exceeded your limits."`} delay={1.5} />
+              </p>
+            </div>
+
+            <Magnetic>
+              <Button
+                variant="default"
+                onClick={() => navigate('/dashboard')}
+                className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black tracking-widest uppercase shadow-[0_0_20px_rgba(234,179,8,0.4)]"
+              >
+                CONFIRM
+              </Button>
+            </Magnetic>
+          </SystemBox>
+        </motion.div>
       </div>
     </div>
   );

@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* The Mana Spectrum */
+    --color-background: 2 6 23;      /* #020617 Deep Slate/Onyx */
+    --color-foreground: 255 255 255; /* #ffffff White */
+    
+    --color-primary: 0 217 255;      /* #00d9ff Electric Cyan */
+    --color-primary-foreground: 2 6 23;
+    
+    --color-secondary: 147 51 234;   /* #9333ea Purple (Shadows) */
+    --color-secondary-foreground: 255 255 255;
+    
+    --color-destructive: 255 0 51;   /* #ff0033 Danger Red */
+    --color-destructive-foreground: 255 255 255;
+    
+    --color-warning: 255 215 0;      /* #ffd700 Solid Gold */
+    --color-warning-foreground: 2 6 23;
+    
+    --color-muted: 15 23 42;         /* #0f172a Slate 900 */
+    --color-muted-foreground: 148 163 184; /* Slate 400 */
+    
+    --color-accent: 255 215 0;
+    --color-accent-foreground: 2 6 23;
+    
+    --color-popover: 2 6 23;
+    --color-popover-foreground: 255 255 255;
+    
+    --color-card: 2 6 23;
+    --color-card-foreground: 255 255 255;
+    
+    --color-border: 0 217 255;       /* Cyan borders by default */
+    --color-input: 15 23 42;
+    --color-ring: 0 217 255;
+    
+    --radius: 0rem; /* Sharp edges for the "System" feel */
+    
+    --cursor-rgb: 0, 217, 255;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased font-body;
+    background-color: rgb(var(--color-background)); /* Enforce background */
+  }
+  
+  /* Typography - The "Machine" Voice */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight uppercase;
+    text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+  }
+}
+
+@layer utilities {
+  /* Film Grain Overlay */
+  .bg-noise {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  /* Glassmorphism System Box */
+  .system-glass {
+    @apply bg-background/60 backdrop-blur-xl border border-primary/20;
+  }
+  
+  /* Text Reveal Utility */
+  .text-glow {
+    text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+  }
+}
+
+/* Custom Scrollbar for Webkit */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #020617; 
+}
+::-webkit-scrollbar-thumb {
+  background: #00d9ff; 
+  border-radius: 0px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00ffff; 
+}

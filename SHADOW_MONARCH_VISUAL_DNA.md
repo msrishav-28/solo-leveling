@@ -1,6 +1,6 @@
 # Shadow Monarch Visual DNA & Experience Protocol
 > **Target Audience:** Design AI / Creative Directors / Frontend Architects
-> **Objective:** Execute a "Cinematic Engineering" overhaul of the Solo Leveling Habit Tracker. The goal is to replicate the "System Interface" from the anime with high-fidelity web technologies.
+> **Objective:** Execute a "Cinematic Engineering" overhaul of Solo Leveling. The goal is to replicate the "System Interface" from the anime with high-fidelity web technologies.
 
 ---
 

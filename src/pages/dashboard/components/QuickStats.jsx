@@ -60,15 +60,15 @@ const QuickStats = ({ stats }) => {
   };
 
   return (
-    <div className="bg-surface rounded-lg border border-border p-6 shadow-elevation-2">
+    <div className="p-0">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-heading font-bold text-text-primary">
+        <h3 className="text-sm font-heading font-bold text-white uppercase tracking-widest pl-2 border-l-2 border-cyan-500">
           Quick Statistics
         </h3>
         <div className="flex items-center space-x-2">
-          <Icon name="BarChart3" size={16} className="text-accent" />
-          <span className="text-sm text-text-secondary">
-            Last 7 days
+          <Icon name="BarChart3" size={14} className="text-cyan-500" />
+          <span className="text-xs font-mono text-cyan-500/60">
+            LAST 7 DAYS
           </span>
         </div>
       </div>
@@ -76,33 +76,28 @@ const QuickStats = ({ stats }) => {
         {statItems?.map((item) => (
           <div
             key={item?.id}
-            className="p-4 bg-background rounded-lg border border-border hover:border-primary/30 transition-all duration-300 hover:scale-[1.02]"
+            className="p-4 bg-cyan-950/10 rounded border border-cyan-500/10 hover:border-cyan-500/40 transition-all duration-300"
           >
             <div className="flex items-center justify-between mb-3">
-              <div 
-                className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ 
-                  backgroundColor: `${item?.color}20`,
-                  border: `2px solid ${item?.color}`
-                }}
+              <div
+                className="w-10 h-10 rounded flex items-center justify-center bg-cyan-500/10 border border-cyan-500/30"
               >
-                <Icon 
-                  name={item?.icon} 
-                  size={18} 
-                  style={{ color: item?.color }}
+                <Icon
+                  name={item?.icon}
+                  size={18}
+                  className={item.changeType === 'increase' ? 'text-cyan-400' : 'text-white'}
                 />
               </div>
-              
+
               {item?.change !== undefined && (
                 <div className="flex items-center space-x-1">
-                  <Icon 
-                    name={getChangeIcon(item?.changeType)} 
-                    size={14} 
-                    style={{ color: getChangeColor(item?.changeType) }}
+                  <Icon
+                    name={getChangeIcon(item?.changeType)}
+                    size={14}
+                    className={item.change > 0 ? "text-cyan-400" : "text-white/40"}
                   />
-                  <span 
-                    className="text-xs font-bold"
-                    style={{ color: getChangeColor(item?.changeType) }}
+                  <span
+                    className={`text-xs font-bold font-mono ${item.change > 0 ? "text-cyan-400" : "text-white/40"}`}
                   >
                     {item?.change > 0 ? '+' : ''}{item?.change}
                   </span>
@@ -111,10 +106,10 @@ const QuickStats = ({ stats }) => {
             </div>
 
             <div className="space-y-1">
-              <div className="text-2xl font-bold font-mono text-text-primary">
+              <div className="text-2xl font-bold font-mono text-white">
                 {item?.value}
               </div>
-              <div className="text-sm text-text-secondary">
+              <div className="text-xs font-mono text-cyan-500/60 uppercase">
                 {item?.label}
               </div>
             </div>
@@ -122,28 +117,20 @@ const QuickStats = ({ stats }) => {
         ))}
       </div>
       {/* Weekly Progress Bar */}
-      <div className="mt-6 pt-6 border-t border-border">
+      <div className="mt-6 pt-6 border-t border-cyan-500/20">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-text-secondary">
+          <span className="text-xs font-mono text-cyan-500/60 uppercase">
             Weekly Goal Progress
           </span>
-          <span className="text-sm font-mono text-text-primary">
-            {stats?.weeklyProgress}% Complete
+          <span className="text-xs font-mono text-white">
+            {stats?.weeklyProgress}%
           </span>
         </div>
-        <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-          <div 
-            className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-500 shadow-glow-primary"
+        <div className="w-full bg-cyan-950/30 rounded-full h-1 overflow-hidden">
+          <div
+            className="h-full bg-cyan-500 shadow-[0_0_10px_cyan]"
             style={{ width: `${stats?.weeklyProgress}%` }}
           ></div>
-        </div>
-        <div className="flex justify-between items-center mt-1">
-          <span className="text-xs text-text-secondary">
-            {stats?.completedThisWeek} of {stats?.weeklyGoal} quests completed
-          </span>
-          <span className="text-xs text-accent font-medium">
-            {stats?.weeklyGoal - stats?.completedThisWeek} remaining
-          </span>
         </div>
       </div>
     </div>

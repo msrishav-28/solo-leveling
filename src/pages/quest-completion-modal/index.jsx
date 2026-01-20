@@ -1,213 +1,124 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import QuestHeader from './components/QuestHeader';
-import TimeTracker from './components/TimeTracker';
-import DifficultyOverride from './components/DifficultyOverride';
-import XPPreview from './components/XPPreview';
-import StreakInfo from './components/StreakInfo';
-import CompletionActions from './components/CompletionActions';
+import SystemBox from '../../components/cinematic/SystemBox';
+import Magnetic from '../../components/cinematic/Magnetic';
+import Icon from '../../components/AppIcon';
+import Button from '../../components/ui/Button';
+import useSystemSound from '../../hooks/useSystemSound';
 
 const QuestCompletionModal = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  
-  // Mock quest data - in real app this would come from props or API
+  const location = useLocation();
+  const { playClick, playLevelUp } = useSystemSound();
+
   const mockQuest = location?.state?.quest || {
     id: "quest_001",
-    title: "Morning Workout Routine",
-    description: "Complete a 30-minute workout session including cardio and strength training exercises to boost your physical fitness and energy levels.",
+    title: "Daily Training: Strength",
+    description: "Complete 100 Pushups to maintain physical condition.",
     difficulty: "Normal",
-    attribute: "Strength",
-    baseXP: 50,
-    type: "daily",
-    category: "fitness",
-    estimatedTime: 30,
-    lastCompletedDate: "2025-11-02",
-    createdAt: "2025-10-15T08:00:00Z"
+    baseXP: 100,
+    type: "daily"
   };
 
-  // Mock user data
-  const mockUser = {
-    id: "user_001",
-    name: "Shadow Hunter",
-    level: 12,
-    currentStreak: 7,
-    totalXP: 2450,
-    attributes: {
-      strength: 25,
-      intelligence: 18,
-      constitution: 22,
-      dexterity: 15,
-      charisma: 12,
-      luck: 8
-    }
-  };
-
-  const [quest] = useState(mockQuest);
-  const [user] = useState(mockUser);
-  const [selectedDifficulty, setSelectedDifficulty] = useState(quest?.difficulty);
   const [timeSpent, setTimeSpent] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [difficulty, setDifficulty] = useState(mockQuest.difficulty);
 
-  // Calculate total XP based on current settings
-  const calculateTotalXP = () => {
-    const difficultyMultipliers = {
-      'Easy': 0.7,
-      'Normal': 1.0,
-      'Hard': 1.5
-    };
-
-    const getTimeBonus = (timeInSeconds) => {
-      const minutes = timeInSeconds / 60;
-      if (minutes >= 30) return 1.2;
-      if (minutes >= 15) return 1.1;
-      if (minutes >= 5) return 1.05;
-      return 1.0;
-    };
-
-    const getStreakBonus = (streak) => {
-      if (streak >= 30) return 1.5;
-      if (streak >= 14) return 1.3;
-      if (streak >= 7) return 1.2;
-      if (streak >= 3) return 1.1;
-      return 1.0;
-    };
-
-    const difficultyMultiplier = difficultyMultipliers?.[selectedDifficulty];
-    const timeBonus = getTimeBonus(timeSpent);
-    const streakBonus = getStreakBonus(user?.currentStreak);
-    
-    const baseWithDifficulty = Math.floor(quest?.baseXP * difficultyMultiplier);
-    const withTimeBonus = Math.floor(baseWithDifficulty * timeBonus);
-    const finalXP = Math.floor(withTimeBonus * streakBonus);
-    
-    return finalXP;
+  const handleComplete = () => {
+    playLevelUp();
+    // Navigate to Reward Screen instead of simple dashboard return
+    navigate('/reward-screen', { state: { quest: mockQuest, totalXP: 150 } });
   };
-
-  const totalXP = calculateTotalXP();
-
-  const handleClose = () => {
-    navigate('/dashboard');
-  };
-
-  const handleComplete = async (completionData) => {
-    setIsProcessing(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    console.log('Quest completed:', completionData);
-    setIsProcessing(false);
-  };
-
-  const handleSkip = async (skipData) => {
-    setIsProcessing(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    console.log('Quest skipped:', skipData);
-    setIsProcessing(false);
-  };
-
-  const handleReschedule = async (rescheduleData) => {
-    setIsProcessing(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    console.log('Quest rescheduled:', rescheduleData);
-    setIsProcessing(false);
-  };
-
-  // Handle escape key to close modal
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e?.key === 'Escape' && !isProcessing) {
-        handleClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isProcessing]);
-
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-md">
-      <div className="w-full h-full overflow-hidden md:w-auto md:h-auto md:max-w-4xl md:max-h-[90vh]">
-        <div className="h-full bg-card border-0 md:border md:border-border rounded-none md:rounded-xl shadow-elevation-3 overflow-hidden">
-          {/* Modal Content */}
-          <div className="h-full flex flex-col">
-            {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-6 md:p-8 space-y-6">
-                {/* Quest Header */}
-                <QuestHeader quest={quest} onClose={handleClose} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+      <SystemBox
+        variant="primary"
+        className="w-full max-w-2xl overflow-hidden shadow-[0_0_100px_rgba(0,217,255,0.2)]"
+      >
+        {/* Header */}
+        <div className="bg-cyan-950/30 p-8 border-b border-cyan-500/20 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-noise opacity-50" />
+          <div className="relative z-10">
+            <div className="inline-block px-3 py-1 mb-4 border border-cyan-500/50 rounded-full bg-cyan-500/10 text-xs font-mono text-cyan-400 uppercase tracking-widest">
+              QUEST COMPLETE
+            </div>
+            <h1 className="text-3xl md:text-4xl font-heading font-black text-white mb-2 tracking-tight drop-shadow-[0_0_10px_rgba(0,217,255,0.5)]">
+              {mockQuest.title}
+            </h1>
+            <p className="text-cyan-400/60 font-mono text-sm max-w-md mx-auto">
+              {mockQuest.description}
+            </p>
+          </div>
+        </div>
 
-                {/* Main Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Left Column */}
-                  <div className="space-y-6">
-                    {/* Time Tracker */}
-                    <TimeTracker 
-                      onTimeUpdate={setTimeSpent}
-                      initialTime={0}
-                    />
-
-                    {/* Difficulty Override */}
-                    <DifficultyOverride
-                      originalDifficulty={quest?.difficulty}
-                      selectedDifficulty={selectedDifficulty}
-                      onDifficultyChange={setSelectedDifficulty}
-                    />
-                  </div>
-
-                  {/* Right Column */}
-                  <div className="space-y-6">
-                    {/* XP Preview */}
-                    <XPPreview
-                      baseXP={quest?.baseXP}
-                      difficulty={selectedDifficulty}
-                      timeSpent={timeSpent}
-                      currentStreak={user?.currentStreak}
-                      totalXP={totalXP}
-                    />
-
-                    {/* Streak Information */}
-                    <StreakInfo
-                      currentStreak={user?.currentStreak}
-                      questType={quest?.type}
-                      lastCompletedDate={quest?.lastCompletedDate}
-                    />
-                  </div>
+        {/* Body */}
+        <div className="p-8 space-y-8 bg-black/40">
+          <div className="grid grid-cols-2 gap-6">
+            {/* Time Track */}
+            <div className="space-y-2">
+              <label className="text-xs font-mono text-cyan-600 uppercase tracking-widest">TIME ELAPSED</label>
+              <div className="p-4 border border-cyan-900/40 bg-cyan-950/10 rounded flex items-center justify-between">
+                <span className="font-mono text-2xl text-white font-bold">{timeSpent}m</span>
+                <div className="flex gap-2">
+                  <button onClick={() => setTimeSpent(Math.max(0, timeSpent - 5))} className="p-1 hover:bg-cyan-500/20 rounded text-cyan-400"><Icon name="Minus" className="w-4 h-4" /></button>
+                  <button onClick={() => setTimeSpent(timeSpent + 5)} className="p-1 hover:bg-cyan-500/20 rounded text-cyan-400"><Icon name="Plus" className="w-4 h-4" /></button>
                 </div>
               </div>
             </div>
 
-            {/* Fixed Footer with Actions */}
-            <div className="border-t border-border bg-card p-6 md:p-8">
-              <CompletionActions
-                quest={quest}
-                selectedDifficulty={selectedDifficulty}
-                timeSpent={timeSpent}
-                totalXP={totalXP}
-                onComplete={handleComplete}
-                onSkip={handleSkip}
-                onReschedule={handleReschedule}
-                isProcessing={isProcessing}
-              />
+            {/* Calibration */}
+            <div className="space-y-2">
+              <label className="text-xs font-mono text-cyan-600 uppercase tracking-widest">DIFFICULTY</label>
+              <div className="flex border border-cyan-900/40 rounded overflow-hidden">
+                {['Easy', 'Normal', 'Hard'].map(d => (
+                  <button
+                    key={d}
+                    onClick={() => setDifficulty(d)}
+                    className={`flex-1 py-3 text-xs font-bold uppercase transition-colors ${difficulty === d ? 'bg-cyan-500 text-black' : 'bg-transparent text-cyan-800 hover:text-cyan-400'}`}
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
+
+          {/* Rewards Preview */}
+          <div className="p-6 border border-cyan-500/30 bg-gradient-to-r from-cyan-950/20 to-transparent rounded relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-20">
+              <Icon name="Trophy" className="w-24 h-24 text-cyan-500 transform rotate-12" />
+            </div>
+            <div className="relative z-10">
+              <label className="text-xs font-mono text-cyan-400 uppercase tracking-widest mb-2 block">REWARD PREVIEW</label>
+              <div className="flex items-baseline gap-2">
+                <span className="text-5xl font-black text-white italic tracking-tighter drop-shadow-[0_0_15px_cyan]">
+                  {Math.floor(mockQuest.baseXP * (difficulty === 'Hard' ? 1.5 : difficulty === 'Easy' ? 0.8 : 1))}
+                </span>
+                <span className="text-xl font-mono text-cyan-500 font-bold">XP</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-4 pt-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/dashboard')}
+              className="flex-1 py-4 text-cyan-700 hover:text-cyan-400 font-mono uppercase tracking-widest"
+            >
+              Close
+            </Button>
+            <Magnetic>
+              <Button
+                onClick={handleComplete}
+                className="flex-[2] py-6 bg-cyan-500 hover:bg-cyan-400 text-black font-black tracking-widest text-lg shadow-[0_0_30px_rgba(6,182,212,0.4)]"
+              >
+                CLAIM REWARDS
+              </Button>
+            </Magnetic>
+          </div>
         </div>
-      </div>
+      </SystemBox>
     </div>
   );
 };
