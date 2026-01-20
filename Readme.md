@@ -3,7 +3,6 @@
 > **"A hunter who doesn't grow is just prey."**  
 > Turn your daily life into a generic RPG? No. Turn it into a **Class S** progression system.
 
-![Project Banner](1_O5_d0iGJM85xFCUH_liimg.jpg)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
