@@ -1,0 +1,75 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+/coverage
+/.nyc_output
+*.lcov
+
+# Production
+build/
+dist/
+.next/
+out/
+
+# Misc
+.DS_Store
+*.pem
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.sln
+*.swp
+*.swc
+*.iml
+*.iws
+*.ipr
+*~
+.eslintcache
+
+# OS
+Thumbs.db
+.turbo/
+.cache/
+
+# Temporary files
+*.tmp
+*.bak
+.venv/
+venv/
+env/
+
+# Compiled Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Certificates
+*.key
+*.crt
