@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useAuth } from '../../hooks/useAuth';
+import { bindShadow } from '../../hooks/useShadows';
+import { validate, signInSchema, signUpSchema } from '../../lib/validation';
 import SystemBackground from '../../components/cinematic/SystemBackground';
 import SystemBox from '../../components/cinematic/SystemBox';
 import Button from '../../components/ui/Button';
@@ -9,10 +11,40 @@ import Icon from '../../components/AppIcon';
 
 const AuthPage = () => {
   const navigate = useNavigate();
-  const { signInWithEmail, signUp } = useAuth();
+  const location = useLocation();
+  const { signInWithEmail, signUp, user } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [info, setInfo] = useState(null);
+
+  const redirectTo = location.state?.from || '/dashboard';
+
+  // Capture a referral code from ?ref= and persist it across the (possible)
+  // email-confirmation round trip.
+  useEffect(() => {
+    const ref = new URLSearchParams(location.search).get('ref');
+    if (ref) localStorage.setItem('sl_ref', ref.toUpperCase());
+  }, [location.search]);
+
+  const consumeReferral = async () => {
+    const ref = localStorage.getItem('sl_ref');
+    if (ref) {
+      await bindShadow(ref);
+      localStorage.removeItem('sl_ref');
+    }
+  };
+
+  // When the submit handler is driving post-auth navigation (it may route a
+  // brand-new hunter to onboarding), this flag suppresses the mount redirect.
+  const navigatingRef = useRef(false);
+
+  // Arrived already signed in? Bind any pending referral, then skip the gate.
+  useEffect(() => {
+    if (user && !navigatingRef.current) {
+      consumeReferral().finally(() => navigate(redirectTo, { replace: true }));
+    }
+  }, [user, navigate, redirectTo]);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -22,19 +54,46 @@ const AuthPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    setInfo(null);
 
+    // Client-side validation first
+    const schema = isLogin ? signInSchema : signUpSchema;
+    const parsed = validate(schema, formData);
+    if (!parsed.success) {
+      setError(parsed.message);
+      return;
+    }
+
+    setLoading(true);
+    navigatingRef.current = true;
     try {
       if (isLogin) {
         const { error: signInError } = await signInWithEmail(formData.email, formData.password);
         if (signInError) throw signInError;
+        await consumeReferral();
+        navigate(redirectTo, { replace: true });
       } else {
-        const { error: signUpError } = await signUp(formData.email, formData.password, formData.hunterName);
+        const { data, error: signUpError } = await signUp(
+          formData.email,
+          formData.password,
+          formData.hunterName
+        );
         if (signUpError) throw signUpError;
+
+        if (data?.session) {
+          // Auto-confirm enabled: session is live -> bind referral + onboard.
+          await consumeReferral();
+          navigate('/job-change', { replace: true });
+        } else {
+          // Email confirmation required: no session yet.
+          navigatingRef.current = false;
+          setInfo('Registration received. Confirm via the email we sent, then sign in.');
+          setIsLogin(true);
+        }
       }
-      navigate('/dashboard');
     } catch (err) {
+      navigatingRef.current = false;
       setError(err.message);
     } finally {
       setLoading(false);
@@ -125,6 +184,12 @@ const AuthPage = () => {
                 </div>
               )}
 
+              {info && (
+                <div className="border border-mana/40 bg-mana/10 p-3 font-mono text-xs uppercase tracking-[0.12em] text-mana">
+                  {info}
+                </div>
+              )}
+
               <Button
                 variant="default"
                 size="lg"
@@ -141,6 +206,7 @@ const AuthPage = () => {
                   type="button"
                   onClick={() => {
                     setError(null);
+                    setInfo(null);
                     setIsLogin(!isLogin);
                   }}
                   className="font-mono text-[11px] uppercase tracking-[0.2em] text-mana/70 transition-colors hover:text-mana"

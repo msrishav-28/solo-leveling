@@ -1,11 +1,24 @@
 import { useCallback } from 'react';
 
+// A single shared AudioContext for the whole app. Browsers cap concurrent
+// contexts (~6 in Chrome); creating one per tone (on every hover/click) used to
+// blow past that limit. Lazily created on first use to respect autoplay policy.
+let sharedCtx = null;
+
+function getAudioContext() {
+    if (typeof window === 'undefined') return null;
+    const Ctor = window.AudioContext || window.webkitAudioContext;
+    if (!Ctor) return null;
+    if (!sharedCtx) sharedCtx = new Ctor();
+    if (sharedCtx.state === 'suspended') sharedCtx.resume().catch(() => {});
+    return sharedCtx;
+}
+
 const useSystemSound = () => {
     const playTone = useCallback((frequency, type, duration, volume = 0.1) => {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
 
-        const ctx = new AudioContext();
         const osc = ctx.createOscillator();
         const gainNode = ctx.createGain();
 

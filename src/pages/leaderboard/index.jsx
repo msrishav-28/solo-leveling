@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SystemBackground from '../../components/cinematic/SystemBackground';
 import SystemBox from '../../components/cinematic/SystemBox';
@@ -6,43 +6,46 @@ import TextReveal from '../../components/cinematic/TextReveal';
 import Magnetic from '../../components/cinematic/Magnetic';
 import Icon from '../../components/AppIcon';
 import Header from '../../components/ui/Header';
+import { useLeaderboard } from '../../hooks/useLeaderboard';
+import { usePlayerStats } from '../../hooks/usePlayerStats';
+import { useAuth } from '../../hooks/useAuth';
+
+const formatXP = (xp) => {
+  const value = Number(xp) || 0;
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+  if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
+  return String(value);
+};
 
 const Leaderboard = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+  const { stats } = usePlayerStats();
+  const { hunters, loading: isLoading, error } = useLeaderboard(100);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRank, setSelectedRank] = useState('all');
-  const [isLoading, setIsLoading] = useState(true);
 
-  const currentUser = { id: 'user-000', name: 'Sung Jin-Woo', level: 99, rank: 'S' };
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
-  const mockHunters = [
-    { id: '1', name: 'Thomas Andre', level: 140, rank: 'S', xp: 15400000, streak: 890, avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&q=80&w=200' },
-    { id: '2', name: 'Liu Zhigang', level: 138, rank: 'S', xp: 14200000, streak: 702, avatar: 'https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?auto=format&fit=crop&q=80&w=200' },
-    { id: '3', name: 'Christopher Reed', level: 135, rank: 'S', xp: 13800000, streak: 654, avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=200' },
-    { id: '4', name: 'Lennart Niermann', level: 132, rank: 'S', xp: 12500000, streak: 543, avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=200' },
-    { id: '5', name: 'Baek Yoon-Ho', level: 110, rank: 'S', xp: 8500000, streak: 342, avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=200' },
-    { id: '6', name: 'Cha Hae-In', level: 95, rank: 'S', xp: 4500000, streak: 210, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200' },
-    { id: '7', name: 'Go Gun-Hee', level: 120, rank: 'S', xp: 11500000, streak: 410, avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200' },
-  ];
+  const filteredHunters = useMemo(
+    () =>
+      hunters.filter(
+        (hunter) =>
+          (selectedRank === 'all' || hunter.tier === selectedRank) &&
+          hunter.name.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [hunters, searchTerm, selectedRank]
+  );
 
-  useEffect(() => {
-    const id = setTimeout(() => setIsLoading(false), 1000);
-    return () => clearTimeout(id);
-  }, []);
-
-  const filteredHunters = useMemo(() => (
-    mockHunters.filter((hunter) => (
-      (selectedRank === 'all' || hunter.rank === selectedRank) &&
-      hunter.name.toLowerCase().includes(searchTerm.toLowerCase())
-    ))
-  ), [searchTerm, selectedRank]);
-
-  const formatXP = (xp) => (xp >= 1000000 ? `${(xp / 1000000).toFixed(1)}M` : `${(xp / 1000).toFixed(1)}K`);
+  const sRankCount = hunters.filter((h) => h.tier === 'S').length;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-void text-foreground">
       <SystemBackground />
-      <Header user={currentUser} onNavigate={navigate} />
+      <Header user={stats} onNavigate={navigate} onSignOut={handleSignOut} />
 
       <main className="relative z-10 mx-auto max-w-[1200px] space-y-8 px-4 py-8 sm:px-6 lg:px-10">
         <div className="flex flex-col gap-6 border-b border-hairline pb-8 md:flex-row md:items-end md:justify-between">
@@ -56,12 +59,12 @@ const Leaderboard = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <SystemBox className="px-5 py-4" variant="primary" animated={false}>
-              <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-mana/70">Total Hunters</div>
-              <div className="mt-1 font-mono text-3xl font-bold tabular-nums text-foreground">14,204</div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-mana/70">Ranked Hunters</div>
+              <div className="mt-1 font-mono text-3xl font-bold tabular-nums text-foreground">{hunters.length}</div>
             </SystemBox>
             <SystemBox className="px-5 py-4" variant="gold" animated={false}>
               <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-loot/70">S-Rank</div>
-              <div className="mt-1 font-mono text-3xl font-bold tabular-nums text-foreground">23</div>
+              <div className="mt-1 font-mono text-3xl font-bold tabular-nums text-foreground">{sRankCount}</div>
             </SystemBox>
           </div>
         </div>
@@ -79,7 +82,7 @@ const Leaderboard = () => {
           </SystemBox>
 
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {['all', 'S', 'A', 'B'].map((rank) => (
+            {['all', 'S', 'A', 'B', 'C'].map((rank) => (
               <Magnetic key={rank}>
                 <button
                   type="button"
@@ -102,34 +105,57 @@ const Leaderboard = () => {
             [...Array(5)].map((_, i) => (
               <SystemBox key={i} animated={false} className="h-24 animate-pulse bg-mana/5" />
             ))
+          ) : error ? (
+            <SystemBox animated={false} className="p-10 text-center" scanline>
+              <Icon name="AlertTriangle" className="mx-auto h-6 w-6 text-threat" />
+              <p className="mt-4 font-mono text-xs uppercase tracking-[0.2em] text-threat">Failed to load rankings</p>
+            </SystemBox>
+          ) : filteredHunters.length === 0 ? (
+            <SystemBox animated={false} className="p-10 text-center" scanline>
+              <Icon name="SearchX" className="mx-auto h-6 w-6 text-mana" />
+              <p className="mt-4 font-mono text-xs uppercase tracking-[0.2em] text-foreground/45">No hunters found</p>
+            </SystemBox>
           ) : (
-            filteredHunters.map((hunter, index) => {
-              const isTop3 = index < 3;
-              const variant = isTop3 ? 'gold' : 'primary';
+            filteredHunters.map((hunter) => {
+              const isTop3 = hunter.rank <= 3;
+              const variant = isTop3 ? 'gold' : hunter.isCurrentUser ? 'primary' : 'primary';
+              const initial = hunter.name.charAt(0).toUpperCase();
 
               return (
-                <SystemBox key={hunter.id} variant={variant} className="overflow-hidden" animated>
+                <SystemBox
+                  key={hunter.id}
+                  variant={variant}
+                  className={`overflow-hidden ${hunter.isCurrentUser ? 'ring-1 ring-mana' : ''}`}
+                  animated
+                >
                   <div className="grid gap-5 p-4 sm:grid-cols-[auto_auto_1fr_auto] sm:items-center sm:p-6">
                     <div className={`font-display text-5xl tabular-nums ${isTop3 ? 'text-loot text-glow-soft' : 'text-mana/45'}`}>
-                      {String(index + 1).padStart(2, '0')}
+                      {String(hunter.rank).padStart(2, '0')}
                     </div>
 
                     <div className="relative h-16 w-16">
                       <div className={`absolute inset-0 blur-lg ${isTop3 ? 'bg-loot/25' : 'bg-mana/20'}`} />
-                      <img
-                        src={hunter.avatar}
-                        alt={hunter.name}
-                        className={`relative h-16 w-16 border object-cover ${
-                          isTop3 ? 'border-loot shadow-[0_0_15px_rgba(255,215,0,0.3)]' : 'border-mana/30 grayscale transition-all group-hover:grayscale-0'
+                      <div
+                        className={`relative grid h-16 w-16 place-items-center border font-display text-2xl ${
+                          isTop3
+                            ? 'border-loot text-loot shadow-[0_0_15px_rgba(255,215,0,0.3)]'
+                            : 'border-mana/30 text-mana'
                         }`}
-                      />
+                      >
+                        {initial}
+                      </div>
                     </div>
 
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-3">
                         <h3 className="truncate text-lg font-bold text-foreground">{hunter.name}</h3>
+                        {hunter.isCurrentUser && (
+                          <span className="border border-mana/40 bg-mana/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em] text-mana">
+                            You
+                          </span>
+                        )}
                         <span className={`border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em] ${isTop3 ? 'border-loot/40 bg-loot/10 text-loot' : 'border-mana/40 bg-mana/10 text-mana'}`}>
-                          {hunter.rank}-Rank
+                          {hunter.tier}-Rank
                         </span>
                       </div>
                       <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.18em] text-foreground/45">

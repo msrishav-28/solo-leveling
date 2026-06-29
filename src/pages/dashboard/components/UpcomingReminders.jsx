@@ -35,7 +35,7 @@ const UpcomingReminders = ({ reminders }) => {
         </span>
       </div>
 
-      {reminders?.length === 0 ? (
+      {!reminders?.length ? (
         <div className="border border-dashed border-hairline py-8 text-center">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/35">No tasks scheduled</p>
         </div>

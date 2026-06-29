@@ -23,15 +23,27 @@ const PlayerStats = ({ player }) => {
             <div className="system-label">Player Signature</div>
             <h2 className="font-display text-3xl text-foreground sm:text-4xl">{player?.name}</h2>
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-mana/60">
-              Level {player?.level} Hunter
+              Level {player?.level} Hunter{player?.class ? ` · ${player.class}` : ''}
             </p>
+            {player?.title && (
+              <span className="mt-2 inline-flex items-center gap-1.5 border border-loot/30 bg-loot/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em] text-loot">
+                <Icon name="BadgeCheck" size={11} /> {player.title}
+              </span>
+            )}
           </div>
         </div>
 
-        <div className="flex w-full items-center justify-between border border-hairline bg-white/[0.03] px-4 py-3 sm:w-auto sm:justify-start sm:gap-3">
-          <Icon name="Flame" size={20} className="text-loot" />
-          <span className="font-mono text-2xl font-bold tabular-nums text-foreground">{player?.streak}</span>
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/50">day streak</span>
+        <div className="flex w-full gap-3 sm:w-auto">
+          <div className="flex flex-1 items-center justify-center gap-3 border border-hairline bg-white/[0.03] px-4 py-3 sm:flex-none">
+            <Icon name="Flame" size={20} className="text-loot" />
+            <span className="font-mono text-2xl font-bold tabular-nums text-foreground">{player?.streak}</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/50">streak</span>
+          </div>
+          <div className="flex flex-1 items-center justify-center gap-3 border border-loot/25 bg-loot/[0.05] px-4 py-3 sm:flex-none">
+            <Icon name="Coins" size={20} className="text-loot" />
+            <span className="font-mono text-2xl font-bold tabular-nums text-foreground">{(player?.gold ?? 0).toLocaleString()}</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/50">gold</span>
+          </div>
         </div>
       </div>
 

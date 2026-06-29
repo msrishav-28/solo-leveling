@@ -4,18 +4,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '../../../components/AppIcon';
 import SystemBox from '../../../components/cinematic/SystemBox';
 import SlashEffect from '../../../components/cinematic/SlashEffect';
+import ShatterEffect from '../../../components/cinematic/ShatterEffect';
+import useSystemSound from '../../../hooks/useSystemSound';
 
 const QuestList = ({ quests, onCompleteQuest }) => {
   const navigate = useNavigate();
+  const { playSlash } = useSystemSound();
   const [filter, setFilter] = useState('all');
   const [slashingId, setSlashingId] = useState(null);
 
   const handleSlash = (id) => {
+    if (slashingId) return;
+    playSlash();
     setSlashingId(id);
     setTimeout(() => {
       onCompleteQuest(id);
       setSlashingId(null);
-    }, 600);
+    }, 700);
   };
 
   const getDifficultyTone = (difficulty) => {
@@ -40,9 +45,11 @@ const QuestList = ({ quests, onCompleteQuest }) => {
 
   const filterOptions = [
     { value: 'all', label: 'All Files' },
+    { value: 'pending', label: 'Active' },
     { value: 'daily', label: 'Daily' },
-    { value: 'recurring', label: 'Recurring' },
+    { value: 'weekly', label: 'Weekly' },
     { value: 'one-time', label: 'Special' },
+    { value: 'completed', label: 'Cleared' },
   ];
 
   return (
@@ -79,11 +86,13 @@ const QuestList = ({ quests, onCompleteQuest }) => {
               <motion.div
                 key={quest.id}
                 layout
+                className="relative"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, scale: 0.96, filter: 'blur(10px)' }}
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               >
+                {slashingId === quest.id && <ShatterEffect color={isDanger ? '#ff0033' : '#00d9ff'} />}
                 <SystemBox
                   className={`overflow-hidden ${quest.completed ? 'opacity-50 grayscale' : ''}`}
                   variant={tone}
