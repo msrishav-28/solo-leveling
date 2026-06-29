@@ -100,14 +100,18 @@ Client calls `rpc('complete_quest', { quest_id })`. The DB handles the rest:
 
 ## Phase 4: Future Expansion (Nice-to-Haves)
 
-### 1. AI "Flavor Text" (Free / Local)
--   **Option A**: **Google Gemini API** (Generous free tier to generate quest descriptions).
--   **Option B**: **WebLLM** (Run small models like Llama-3 or Phi-3 directly in the browser). *Zero cost, runs on user's GPU.*
--   *Input:* "Do laundry" -> *Output:* "Quest: Purify the Shadow Realm Armor"
+### 1. AI "Flavor Text" — ✅ Implemented
+-   The "Systemize" button in the quest creator rewrites tasks into RPG flavor.
+-   **Real LLM path**: Claude via the `systemize` Supabase Edge Function
+    (`supabase/functions/systemize/index.ts`) — key stays server-side.
+-   **Offline fallback**: a local rule-based generator (`src/lib/flavor.js`), so
+    the feature works with no key and degrades gracefully.
+-   *Input:* "Do laundry" -> *Output:* "Purge the Shadow-Stained Halls"
 
-### 2. Social "Dungeons"
--   Group Quests (Raids) where multiple users contribute to a goal.
--   Requires: Real-time Supabase Subscriptions.
+### 2. Social "Dungeons" (co-op raids) — still future
+-   Single-player Dungeons (projects → floors → boss → Rune Stone) **are shipped**.
+-   Remaining: **group/co-op** raids where multiple users contribute to one goal.
+-   Requires: shared dungeon state + real-time Supabase subscriptions + presence.
 
 ---
 
