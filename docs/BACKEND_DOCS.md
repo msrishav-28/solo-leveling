@@ -118,3 +118,15 @@ All progression-mutating RPCs are `SECURITY DEFINER` and route stat changes
 through `award_xp`, which sets the `app.allow_stat_update` session flag so the
 `protect_user_stats` trigger permits the write. Direct PostgREST writes to
 XP/level/rank/gold/streak/attributes/penalty/referral columns are rejected.
+
+## Edge Function: `systemize` (optional AI)
+
+`supabase/functions/systemize/index.ts` is a Deno edge function that rewrites a
+plain task title into Solo-Leveling quest flavor using the Anthropic Claude SDK.
+It runs server-side so `ANTHROPIC_API_KEY` (a Supabase secret, not a client var)
+is never exposed to the browser. It requires an authenticated Supabase user
+(`auth.getUser()` on the forwarded JWT) before calling the model. Model defaults
+to `claude-opus-4-8`, overridable via the `ANTHROPIC_MODEL` secret. The client
+(`src/lib/ai.js`) calls it via `supabase.functions.invoke('systemize')` and
+falls back to the local rule-based generator (`src/lib/flavor.js`) when the
+function is absent or errors — so the feature degrades gracefully with no key.

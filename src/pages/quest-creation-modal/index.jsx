@@ -12,7 +12,7 @@ import {
   difficultyFromShort,
   xpForDifficulty,
 } from '../../lib/gamification';
-import { systemize } from '../../lib/flavor';
+import { systemizeTitle } from '../../lib/ai';
 
 const TYPE_OPTIONS = [
   { id: 'daily', canonical: 'DAILY', label: 'daily' },
@@ -38,7 +38,16 @@ const QuestCreationModal = () => {
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [systemizing, setSystemizing] = useState(false);
   const [loadingQuest, setLoadingQuest] = useState(isEdit);
+
+  const handleSystemize = async () => {
+    if (!formData.title.trim() || systemizing) return;
+    setSystemizing(true);
+    const { title } = await systemizeTitle(formData.title);
+    setSystemizing(false);
+    if (title) setFormData((p) => ({ ...p, title }));
+  };
 
   // Edit mode: pre-fill the form from the real quest (fixes the old "wipe" bug).
   useEffect(() => {
@@ -142,12 +151,13 @@ const QuestCreationModal = () => {
                     <label className="system-label" htmlFor="quest-title">Quest Title</label>
                     <button
                       type="button"
-                      disabled={!formData.title.trim()}
-                      onClick={() => setFormData((p) => ({ ...p, title: systemize(p.title) }))}
+                      disabled={!formData.title.trim() || systemizing}
+                      onClick={handleSystemize}
                       className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-mana transition-colors hover:text-mana-glow disabled:opacity-40"
-                      title="Rewrite this title in System flavor"
+                      title="Rewrite this title in System flavor (AI, falls back to local)"
                     >
-                      <Icon name="Sparkles" className="h-3.5 w-3.5" /> Systemize
+                      <Icon name={systemizing ? 'Loader' : 'Sparkles'} className={`h-3.5 w-3.5 ${systemizing ? 'animate-spin' : ''}`} />
+                      {systemizing ? 'Systemizing' : 'Systemize'}
                     </button>
                   </div>
                   <input
