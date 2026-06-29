@@ -81,6 +81,22 @@ Built with a **"Shadow Monarch" Visual DNA**, this isn't just a todo list—it's
    npm run serve      # preview the production build locally
    ```
 
+6. **(Optional) AI quest flavoring:**
+   The "Systemize" button in the quest creator rewrites a plain task into RPG
+   flavor. It works offline via a local generator, but for real LLM output deploy
+   the `systemize` Supabase Edge Function (Claude, server-side — the API key never
+   touches the browser):
+   ```bash
+   supabase login
+   supabase link --project-ref <your-project-ref>
+   supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+   # optional cheaper model for this high-volume rewrite:
+   # supabase secrets set ANTHROPIC_MODEL=claude-haiku-4-5
+   supabase functions deploy systemize
+   ```
+   If the function isn't deployed, the app silently uses the local generator —
+   no error, no key required.
+
 Vercel deployment is configured through `vercel.json` (Vite build + SPA rewrite
 for React Router). See the project handoff for full deployment steps.
 
