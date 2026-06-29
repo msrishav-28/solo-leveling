@@ -17,11 +17,13 @@ import SystemBox from '../../components/cinematic/SystemBox';
 import ShadowExtractionModal from '../../components/cinematic/ShadowExtractionModal';
 import { usePlayerStats } from '../../hooks/usePlayerStats';
 import { useQuests } from '../../hooks/useQuests';
-import {
-  achievementsData,
-  remindersData,
-  quickStatsData
-} from '../../utils/mockData';
+import { useDashboard } from '../../hooks/useDashboard';
+import { usePenalty } from '../../hooks/usePenalty';
+import { useRuneStones } from '../../hooks/useRuneStones';
+import { useAuth } from '../../hooks/useAuth';
+import { useToast } from '../../context/ToastContext';
+import PenaltyBanner from './components/PenaltyBanner';
+import RuneStones from './components/RuneStones';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -29,8 +31,25 @@ const Dashboard = () => {
   const [isShadowModalOpen, setIsShadowModalOpen] = useState(false);
 
   // Supabase Hooks
+  const { signOut } = useAuth();
+  const { toast } = useToast();
   const { stats: playerStats, loading: statsLoading } = usePlayerStats();
   const { quests, loading: questsLoading, completeQuest } = useQuests();
+  const { quickStats, achievements } = useDashboard(playerStats);
+  const { penalty, survivalQuestId, justTriggered, recheck: recheckPenalty } = usePenalty();
+  const { runes } = useRuneStones();
+
+  // Announce a freshly-triggered Penalty Zone
+  useEffect(() => {
+    if (justTriggered) {
+      toast({
+        variant: 'danger',
+        title: 'Penalty Zone',
+        message: 'You missed a quest. Clear the Survival Quest to restore XP gain.',
+        icon: 'AlertTriangle',
+      });
+    }
+  }, [justTriggered, toast]);
 
   // Update current time every minute
   useEffect(() => {
@@ -65,11 +84,70 @@ const Dashboard = () => {
     attributes: []
   };
 
-  // Data imported from utils/mockData
+  // Real, Supabase-backed side-panel data
+  const dashboardQuickStats = quickStats || {
+    totalQuests: 0,
+    completedToday: 0,
+    weeklyStreak: displayStats?.streak ?? 0,
+    totalXP: displayStats?.currentXP ?? 0,
+    weeklyProgress: 0,
+  };
 
-  const handleCompleteQuest = (questId) => {
-    completeQuest(questId);
-    navigate('/quest-completion-modal', { state: { questId } });
+  const reminders = (quests || [])
+    .filter((q) => !q.completed && q.deadline)
+    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+    .slice(0, 5)
+    .map((q) => ({
+      id: q.id,
+      questTitle: q.title,
+      questType: q.type,
+      scheduledTime: q.deadline,
+    }));
+
+  const handleCompleteQuest = async (questId) => {
+    const quest = (quests || []).find((q) => q.id === questId);
+    const result = await completeQuest(questId);
+
+    if (!result || result.error) {
+      const msg = result?.error || 'Something went wrong.';
+      if (msg.includes('PENALTY_ACTIVE')) {
+        toast({
+          variant: 'danger',
+          title: 'XP Locked',
+          message: 'Clear your Survival Quest before completing others.',
+          icon: 'ShieldAlert',
+        });
+        recheckPenalty();
+      } else {
+        toast({ variant: 'danger', title: 'System Error', message: msg, icon: 'AlertTriangle' });
+      }
+      return;
+    }
+
+    // Achievement unlock toasts
+    (result.achievements_unlocked || []).forEach((a) => {
+      toast({
+        variant: 'gold',
+        title: 'Achievement Unlocked',
+        message: `${a.title}  (+${a.xp_reward} XP)`,
+        icon: a.icon || 'Trophy',
+      });
+    });
+
+    if (result.master_bonus > 0) {
+      toast({ variant: 'mana', title: 'Shadow Tribute', message: `Your Master absorbed +${result.master_bonus} XP.`, icon: 'Ghost' });
+    }
+
+    // A Survival Quest clears the Penalty Zone — stay on the dashboard.
+    if (result.is_survival) {
+      toast({ variant: 'mana', title: 'System Restored', message: 'Penalty Zone cleared. XP gain re-enabled.', icon: 'ShieldCheck' });
+      recheckPenalty();
+      return;
+    }
+
+    navigate('/quest-completion-modal', {
+      state: { reward: result, questTitle: quest?.title || result.quest_title },
+    });
   };
 
   const handleEditQuest = (questId) => {
@@ -86,6 +164,11 @@ const Dashboard = () => {
 
   const handleNavigate = (path) => {
     navigate(path);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
   };
 
   const formatTime = (date) => {
@@ -106,10 +189,10 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-void text-foreground overflow-hidden relative selection:bg-mana selection:text-void">
-      <SystemBackground />
+    <div className={`min-h-screen bg-void text-foreground overflow-hidden relative selection:bg-mana selection:text-void ${penalty ? 'penalty-zone' : ''}`}>
+      <SystemBackground tone={penalty ? 'danger' : 'mana'} />
 
-      <Header user={displayStats} onNavigate={handleNavigate} />
+      <Header user={displayStats} onNavigate={handleNavigate} onSignOut={handleSignOut} />
 
       <main className="relative z-10 mx-auto max-w-[1400px] space-y-8 px-4 py-8 sm:px-6 lg:px-10">
 
@@ -139,6 +222,16 @@ const Dashboard = () => {
             <Magnetic>
               <Button
                 variant="outline"
+                onClick={() => navigate('/dungeons')}
+                iconName="Swords"
+                iconPosition="left"
+              >
+                Dungeons
+              </Button>
+            </Magnetic>
+            <Magnetic>
+              <Button
+                variant="outline"
                 onClick={handleViewLeaderboard}
                 iconName="Trophy"
                 iconPosition="left"
@@ -158,6 +251,14 @@ const Dashboard = () => {
             </Magnetic>
           </div>
         </div>
+
+        {/* Penalty Zone */}
+        {penalty && (
+          <PenaltyBanner
+            survivalQuestId={survivalQuestId}
+            onExecute={handleCompleteQuest}
+          />
+        )}
 
         {/* Player Stats Section */}
         <SystemBox className="p-1" scanline>
@@ -184,14 +285,19 @@ const Dashboard = () => {
           {/* Side Panel - Using SystemBox for homogeneity */}
           <div className="space-y-6">
             <SystemBox className="p-6">
-              <QuickStats stats={quickStatsData} />
+              <QuickStats stats={dashboardQuickStats} />
             </SystemBox>
             <SystemBox className="p-6" variant="primary">
-              <RecentAchievements achievements={achievementsData} />
+              <RecentAchievements achievements={achievements} />
             </SystemBox>
             <SystemBox className="p-6">
-              <UpcomingReminders reminders={remindersData} />
+              <UpcomingReminders reminders={reminders} />
             </SystemBox>
+            {runes.length > 0 && (
+              <SystemBox className="p-6" variant="gold">
+                <RuneStones runes={runes} />
+              </SystemBox>
+            )}
           </div>
         </div>
       </main>

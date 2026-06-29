@@ -220,3 +220,39 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #00d9ff;
 }
+
+/* ============================================================
+   Penalty Zone — glitch text + ambient red shift
+   ============================================================ */
+.glitch-text {
+  position: relative;
+  display: inline-block;
+}
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.glitch-text::before {
+  color: #00d9ff;
+  animation: glitch-shift 2.4s infinite steps(2, end);
+  clip-path: inset(0 0 60% 0);
+  opacity: 0.7;
+}
+.glitch-text::after {
+  color: #ff0033;
+  animation: glitch-shift 1.8s infinite reverse steps(2, end);
+  clip-path: inset(60% 0 0 0);
+  opacity: 0.7;
+}
+@keyframes glitch-shift {
+  0%, 92%, 100% { transform: translate(0, 0); }
+  93% { transform: translate(-2px, 1px); }
+  96% { transform: translate(2px, -1px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glitch-text::before,
+  .glitch-text::after { animation: none; }
+}

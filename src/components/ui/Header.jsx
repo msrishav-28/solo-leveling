@@ -2,12 +2,12 @@ import React, { useMemo, useState } from 'react';
 import Icon from '../AppIcon';
 import Button from './Button';
 
-const Header = ({ user, onNavigate }) => {
+const Header = ({ user, onNavigate, onSignOut }) => {
   const [open, setOpen] = useState(false);
   const navItems = useMemo(() => ([
     { label: 'Dashboard', path: '/dashboard', tone: 'mana' },
-    { label: 'Dungeons', path: '/dungeon/1', tone: 'threat' },
-    { label: 'Shadows', action: 'shadow', tone: 'shadow' },
+    { label: 'Dungeons', path: '/dungeons', tone: 'threat' },
+    { label: 'Shop', path: '/shop', tone: 'loot' },
     { label: 'Ranks', path: '/leaderboard', tone: 'loot' },
   ]), []);
 
@@ -50,12 +50,24 @@ const Header = ({ user, onNavigate }) => {
         <div className="flex items-center gap-3">
           <div className="hidden items-center gap-3 border-l border-hairline pl-4 sm:flex">
             <div className="text-right">
-              <div className="max-w-[130px] truncate text-xs font-bold text-foreground">{user?.name || 'Hunter'}</div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-mana">LVL {user?.level || 1}</div>
+              <div className="max-w-[150px] truncate text-xs font-bold text-foreground">{user?.name || 'Hunter'}</div>
+              <div className="flex items-center justify-end gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-mana">
+                <span>LVL {user?.level || 1}</span>
+                {typeof user?.gold === 'number' && <span className="text-loot">· {user.gold.toLocaleString()}G</span>}
+              </div>
             </div>
             <div className="grid h-9 w-9 place-items-center border border-hairline bg-mana/10 text-mana">
               <Icon name="User" className="h-4 w-4" />
             </div>
+            {onSignOut && (
+              <Button
+                size="icon"
+                variant="ghost"
+                iconName="LogOut"
+                aria-label="Sign out"
+                onClick={onSignOut}
+              />
+            )}
           </div>
 
           <Button
@@ -83,6 +95,19 @@ const Header = ({ user, onNavigate }) => {
                 <span className="text-mana/60">{String(index + 1).padStart(2, '0')}</span>
               </button>
             ))}
+            {onSignOut && (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  onSignOut();
+                }}
+                className="flex items-center justify-between border border-threat/30 bg-threat/[0.06] px-4 py-3 font-mono text-xs uppercase tracking-[0.18em] text-threat"
+              >
+                <span>Sign Out</span>
+                <Icon name="LogOut" className="h-4 w-4" />
+              </button>
+            )}
           </nav>
         </div>
       )}

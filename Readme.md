@@ -17,52 +17,72 @@ Built with a **"Shadow Monarch" Visual DNA**, this isn't just a todo list—it's
 
 ## Key Features
 
-- **System-Based Progression**: Earn XP, level up, and increase your Rank (E-Rank to S-Rank).
-- **Attribute System**: visualized stats for Strength, Intelligence, Constitution, etc.
-- **Quest Board**: Daily, Weekly, and One-time quests with difficulty ratings.
-- **Shadow Army**: A referral/extraction modal interface; backend-backed army data remains future work.
-- **Cinematic Visuals**: R3F/Three.js gate scenes, mana particles, holographic grids, glass surfaces, and Framer Motion interactions.
+- **System-Based Progression**: Earn XP, level up, and increase your Rank (E-Rank to S-Rank) — all server-authoritative and cheat-proof.
+- **Attribute System**: Six stats (STR/INT/CON/DEX/CHA/LUK) buffed by completing linked quests; class selection grants starting boosts.
+- **Quest Board**: Daily, Weekly, and One-time quests with difficulty ratings, full create/edit, and a "slash to execute" completion flow.
+- **Penalty Zone**: Miss a quest and the System glitches red — XP is locked until you clear an auto-spawned Survival Quest.
+- **Dungeons (Projects)**: Treat projects as raids with milestone "floors", a deadline "boss", and a **Rune Stone** reward on clear.
+- **Achievements**: Real, one-time unlocks that credit bonus XP, with rarity tiers (common → legendary).
+- **System Shop**: Spend earned gold on permanent attribute Elixirs and unlockable Titles — a real economy sink (`/shop`).
+- **Shadow Army**: A working referral system — hunters who join via your sigil become your Shadows, and you absorb 5% of their XP.
+- **Cinematic Completion**: Striking a quest shatters the card into mana particles that fly toward the XP bar, with a "Systemize" generator that rewrites plain tasks into RPG flavor.
+- **Cinematic Visuals**: R3F/Three.js gate scenes, mana particles, holographic grids, glass surfaces, system toasts, and Framer Motion interactions.
 - **Product Landing**: A full marketing experience at `/` with a direct entry path to `/auth`.
-- **Responsive App Shell**: Mobile navigation and adaptive layouts across the dashboard, forms, dungeons, leaderboard, rewards, and system states.
+- **Responsive App Shell**: Mobile navigation and adaptive layouts across the dashboard, dungeons, leaderboard, rewards, and system states.
 
 ## Quick Start
 
 ### Prerequisites
 - Node.js v18+
 - npm
-- A Supabase project (for backend features)
+- A free [Supabase](https://supabase.com) project (PostgreSQL + Auth)
 
 ### Installation
 
-1. **Clone the repository:**
+1. **Clone & install:**
    ```bash
    git clone https://github.com/msrishav-28/solo-leveling.git
    cd solo-leveling
-   ```
-
-2. **Install modules:**
-   ```bash
    npm install
    ```
 
+2. **Provision the database:**
+   In the Supabase Dashboard open **SQL Editor**, paste the full contents of
+   [`schema.sql`](schema.sql) and **Run**. This creates the tables, Row Level
+   Security policies, the server-authoritative `complete_quest` / `apply_job_change`
+   / `get_leaderboard` functions, the signup trigger, indexes and seed
+   achievements. The script is safe to re-run after edits.
+
+   > Optional: enable **Realtime** on the `users` table (Database → Replication)
+   > for live XP/level updates across tabs. The app also refreshes on navigation,
+   > so it works without it.
+
+   > Recommended for local testing: **Authentication → Providers → Email →**
+   > turn **off** "Confirm email" so new accounts get a session immediately.
+   > If left on, users must confirm via email before signing in.
+
 3. **Environment Setup:**
-   Create a `.env` file in the root directory:
+   Copy `.env.example` to `.env` and fill in your project values
+   (Project Settings → API):
    ```env
    VITE_SUPABASE_URL=your_supabase_project_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
-4. **Awaken the System:**
+4. **Awaken the System (dev server):**
    ```bash
-   npm start
+   npm start          # or: npm run dev  → http://localhost:5173
    ```
 
-5. **Create a production build:**
+5. **Verify the build & logic:**
    ```bash
-   npm run build
+   npm test           # vitest — gamification + validation unit tests
+   npm run build      # production build to dist/
+   npm run serve      # preview the production build locally
    ```
 
-The Vite development server runs at `http://localhost:5173` by default. Vercel deployment is configured through `vercel.json`, including the SPA rewrite required by React Router.
+Vercel deployment is configured through `vercel.json` (Vite build + SPA rewrite
+for React Router). See the project handoff for full deployment steps.
 
 ## Documentation
 

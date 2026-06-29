@@ -8,25 +8,34 @@ import Magnetic from '../../components/cinematic/Magnetic';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
 import useSystemSound from '../../hooks/useSystemSound';
+import { ATTRIBUTES } from '../../lib/gamification';
 
 const RewardScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { playLevelUp } = useSystemSound();
-  const { quest, totalXP } = location.state || { quest: { title: 'Daily Quest' }, totalXP: 200 };
+  const reward = location.state?.reward;
+  const questTitle = location.state?.questTitle || reward?.quest_title || 'Quest';
   const [showContent, setShowContent] = useState(false);
 
+  // Reward is server-computed; a direct visit has nothing to celebrate.
   useEffect(() => {
+    if (!reward) {
+      navigate('/dashboard', { replace: true });
+      return undefined;
+    }
     playLevelUp();
     const id = setTimeout(() => setShowContent(true), 500);
     return () => clearTimeout(id);
-  }, [playLevelUp]);
+  }, [reward, playLevelUp, navigate]);
 
-  const stats = [
-    { label: 'STR', value: '+2', icon: 'Sword' },
-    { label: 'AGI', value: '+1', icon: 'Zap' },
-    { label: 'VIT', value: '+1', icon: 'Heart' },
-  ];
+  if (!reward) return null;
+
+  const totalXP = reward.xp_gained;
+  const stats = (reward.attributes || [])
+    .map((id) => ATTRIBUTES.find((a) => a.id === id))
+    .filter(Boolean)
+    .map((a) => ({ label: a.id, value: '+1', icon: a.icon }));
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-void p-4 text-foreground">
@@ -49,8 +58,12 @@ const RewardScreen = () => {
               >
                 System Notification
               </motion.div>
-              <h1 className="font-display text-glow text-6xl text-foreground sm:text-7xl">Level Up</h1>
-              <p className="font-mono text-xs uppercase tracking-[0.18em] text-foreground/45">{quest?.title}</p>
+              <h1 className="font-display text-glow text-6xl text-foreground sm:text-7xl">
+                {reward.leveled_up ? 'Level Up' : 'Quest Cleared'}
+              </h1>
+              <p className="font-mono text-xs uppercase tracking-[0.18em] text-foreground/45">
+                {questTitle} · LVL {reward.level} · RANK {reward.rank}
+              </p>
             </div>
 
             <div className="relative mx-auto grid h-44 w-44 place-items-center">
@@ -67,6 +80,7 @@ const RewardScreen = () => {
               </div>
             </div>
 
+            {stats.length > 0 && (
             <div className="grid grid-cols-3 gap-px bg-loot/25">
               {stats.map((stat, i) => (
                 <motion.div
@@ -82,6 +96,7 @@ const RewardScreen = () => {
                 </motion.div>
               ))}
             </div>
+            )}
 
             <div className="border-t border-loot/20 pt-6">
               <p className="font-mono text-sm text-loot/80">

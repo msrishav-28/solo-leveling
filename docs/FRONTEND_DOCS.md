@@ -55,8 +55,10 @@ Shared product controls provide consistent sizes, states, system audio feedback,
 -   `useAuth` reads the Supabase session and exposes email/password sign-in, registration, and sign-out.
 -   `usePlayerStats` reads and subscribes to the authenticated player's record.
 -   `useQuests` reads, creates, and completes authenticated quest records.
+-   `useDashboard` derives quick stats (quest counts, completions today/this week) and unlocked achievements from Supabase.
+-   `useLeaderboard` reads global rankings via the `get_leaderboard` RPC.
 -   Local `useState` handles view state such as forms, navigation, animation steps, and dialogs.
--   Secondary dashboard achievements, reminders, and aggregate quick stats currently come from `src/utils/mockData.js`; quest and player flows do not.
+-   Dashboard side panels (quick stats, achievements, reminders) are now fully Supabase-backed; `src/utils/mockData.js` has been removed.
 
 Add a query/cache layer only when shared asynchronous state or invalidation becomes complex enough to justify it. Do not duplicate Supabase data into global state by default.
 
@@ -68,9 +70,11 @@ The app uses **React Router v6** with a global error boundary, scroll restoratio
 -   `/landing-page`: Alias of the product landing.
 -   `/auth`: Supabase email/password authentication and registration.
 -   `/job-change`: Class-selection onboarding.
--   `/dashboard`: Main quest board (The "Instance").
+-   `/dashboard`: Main quest board (The "Instance"), Penalty Zone, rune relics.
 -   `/leaderboard`: Hunter ranking interface.
--   `/dungeon/:id`: Dynamic dungeon detail and combat flow.
+-   `/dungeons`: Dungeon (project) list + create.
+-   `/dungeon/:id`: Dungeon detail — floors, boss countdown, rune reward.
+-   `/shop`: System Shop — spend gold on Elixirs and Titles.
 -   `/quest-creation-modal`: Quest create/edit screen.
 -   `/quest-completion-modal`: Completion confirmation and reward transition.
 -   `/reward-screen`: Rank and reward presentation.

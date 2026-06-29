@@ -3,25 +3,21 @@ import { motion } from 'framer-motion';
 import Button from '../ui/Button';
 import Icon from '../AppIcon';
 import SystemBox from './SystemBox';
+import { useShadows } from '../../hooks/useShadows';
 
 const ShadowExtractionModal = ({ isOpen, onClose }) => {
-  const [isArising, setIsArising] = useState(false);
+  const { referralCode, referralLink, shadows, loading } = useShadows();
   const [linkCopied, setLinkCopied] = useState(false);
 
-  const shadows = [
-    { id: 1, name: 'IGRIS', rank: 'General', date: '2025-10-15' },
-    { id: 2, name: 'TANK', rank: 'Knight', date: '2025-10-20' },
-    { id: 3, name: 'IRON', rank: 'Elite', date: '2025-11-01' },
-  ];
-
-  const handleArise = () => {
-    setIsArising(true);
-    setTimeout(() => {
-      navigator.clipboard.writeText('https://solo-leveling-habit.app/join?ref=SHADOW_MONARCH');
+  const handleArise = async () => {
+    if (!referralLink) return;
+    try {
+      await navigator.clipboard.writeText(referralLink);
       setLinkCopied(true);
-      setIsArising(false);
       setTimeout(() => setLinkCopied(false), 3000);
-    }, 1500);
+    } catch {
+      setLinkCopied(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -48,50 +44,70 @@ const ShadowExtractionModal = ({ isOpen, onClose }) => {
               <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple-300/65">Expand Your Army</div>
               <h2 className="font-display mt-2 text-3xl text-purple-200 text-glow-soft">Shadow Extraction</h2>
             </div>
-            <button type="button" onClick={onClose} className="text-purple-300/70 transition-colors hover:text-white">
+            <button type="button" onClick={onClose} className="text-purple-300/70 transition-colors hover:text-white" aria-label="Close">
               <Icon name="X" />
             </button>
           </div>
 
-          <div className="space-y-8 p-6 sm:p-8">
-            <div className="text-center">
+          <div className="space-y-7 p-6 sm:p-8">
+            <p className="text-center text-sm text-foreground/60">
+              Hunters who awaken through your gate become your <span className="text-purple-200">Shadows</span>.
+              You absorb <span className="text-purple-200">5% of all XP</span> they earn — forever.
+            </p>
+
+            {/* Referral code + link */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between border border-purple-400/25 bg-purple-500/[0.06] px-4 py-3">
+                <div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-purple-300/60">Your Sigil</div>
+                  <div className="font-display text-xl tracking-[0.18em] text-purple-100">{referralCode || '— — — —'}</div>
+                </div>
+                <Icon name="Fingerprint" className="h-7 w-7 text-purple-300/50" />
+              </div>
+
               <button
                 type="button"
                 onClick={handleArise}
-                disabled={isArising}
-                className="group relative mx-auto grid h-32 w-32 place-items-center border border-purple-400/45 bg-purple-500/10 transition-all hover:border-purple-300 hover:bg-purple-500/15 disabled:opacity-60"
+                disabled={!referralLink}
+                className="group flex w-full items-center justify-center gap-3 border border-purple-400/45 bg-purple-500/10 px-5 py-4 font-mono text-xs uppercase tracking-[0.2em] text-purple-100 transition-all hover:border-purple-300 hover:bg-purple-500/15 disabled:opacity-50"
               >
-                <span className="absolute inset-0 -z-10 bg-purple-500/30 blur-2xl opacity-50 transition-opacity group-hover:opacity-80" />
-                <span className="flex flex-col items-center gap-3">
-                  <Icon name={isArising ? 'Loader' : 'Users'} className={`h-10 w-10 text-purple-200 ${isArising ? 'animate-spin' : ''}`} />
-                  <span className="font-display text-sm text-purple-100">{isArising ? 'Extracting' : 'Arise'}</span>
-                </span>
+                <Icon name={linkCopied ? 'Check' : 'Link'} className="h-4 w-4" />
+                {linkCopied ? 'Summon Link Copied' : 'Copy Summon Link — "Arise"'}
               </button>
-
-              <p className="mx-auto mt-5 max-w-xs text-sm text-foreground/55">
-                {linkCopied ? <span className="font-mono text-mana">LINK COPIED TO CLIPBOARD</span> : 'Call forth new soldiers to join your ranks.'}
-              </p>
             </div>
 
+            {/* Shadow army */}
             <div>
               <div className="mb-3 flex items-center justify-between border-b border-purple-400/20 pb-2">
-                <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-purple-300/75">Current Army</h3>
+                <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-purple-300/75">Shadow Army</h3>
                 <span className="font-mono text-[10px] text-purple-300/45">{shadows.length} units</span>
               </div>
-              <div className="max-h-44 space-y-2 overflow-y-auto pr-1">
-                {shadows.map((shadow) => (
-                  <div key={shadow.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 border border-purple-400/15 bg-purple-500/[0.06] p-3">
-                    <div className="grid h-8 w-8 place-items-center border border-purple-400/20 bg-purple-500/10">
-                      <div className="h-1.5 w-1.5 rounded-full bg-purple-300 shadow-[0_0_10px_#d8b4fe]" />
+
+              {loading ? (
+                <div className="py-6 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-purple-300/40 animate-pulse">
+                  Scanning the dark...
+                </div>
+              ) : shadows.length === 0 ? (
+                <div className="border border-dashed border-purple-400/20 py-8 text-center">
+                  <Icon name="Ghost" className="mx-auto h-6 w-6 text-purple-300/40" />
+                  <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-purple-300/40">No shadows yet — share your sigil</p>
+                </div>
+              ) : (
+                <div className="max-h-44 space-y-2 overflow-y-auto pr-1">
+                  {shadows.map((shadow) => (
+                    <div key={shadow.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 border border-purple-400/15 bg-purple-500/[0.06] p-3">
+                      <div className="grid h-9 w-9 place-items-center border border-purple-400/25 bg-purple-500/10 font-display text-purple-100">
+                        {shadow.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-bold text-purple-50">{shadow.name}</div>
+                        <div className="font-mono text-[10px] text-purple-300/55">LVL {shadow.level} · {shadow.rank}-Rank</div>
+                      </div>
+                      <div className="font-mono text-[10px] text-purple-300/45">{(shadow.xp || 0).toLocaleString()} XP</div>
                     </div>
-                    <div>
-                      <div className="text-sm font-bold text-purple-50">{shadow.name}</div>
-                      <div className="font-mono text-[10px] text-purple-300/55">{shadow.rank} Class</div>
-                    </div>
-                    <div className="font-mono text-[10px] text-purple-300/35">{shadow.date}</div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <Button variant="secondary" className="w-full" onClick={onClose}>

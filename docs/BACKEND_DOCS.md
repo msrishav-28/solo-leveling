@@ -76,31 +76,45 @@ const { data, error } = await supabase
 ```
 
 ### Example: Completing a Quest (Server-Authoritative)
-**CRITICAL**: We do NOT update XP on the client. We verify an action, and the Server updates the stats.
+**CRITICAL**: We do NOT update XP on the client. The client only signals intent;
+Postgres decides the reward. See the full implementation in [`schema.sql`](../schema.sql).
 
-```sql
--- Postgres Function (The Logic)
-create function complete_quest(quest_id uuid)
-returns json as $$
-declare
-  quest_xp int;
-begin
-  -- 1. Get XP for quest
-  select base_xp into quest_xp from quests where id = quest_id;
+The `complete_quest(quest_id uuid)` SECURITY DEFINER function:
+1. Verifies the quest belongs to `auth.uid()` and is not already completed.
+2. Computes XP from the quest's **difficulty** (`xp_for_difficulty`) — it ignores
+   any client-supplied `base_xp`, so a client cannot inflate its reward.
+3. Maintains the daily streak (based on the last completion date).
+4. Recomputes `level` and `current_rank`, awards gold, and buffs each linked
+   attribute by +1.
+5. Logs the completion and closes the quest (`is_completed = true`).
+6. Returns a JSON summary used to render the reward screen.
 
-  -- 2. Award XP to User & Update Level
-  update users 
-  set total_xp = total_xp + quest_xp
-  where id = auth.uid();
-
-  -- 3. Log it
-  insert into quest_completions (user_id, quest_id, xp_awarded)
-  values (auth.uid(), quest_id, quest_xp);
-end;
-$$ language plpgsql security definer;
-```
+A `protect_user_stats` trigger additionally freezes all progression columns
+against direct `UPDATE`s through PostgREST, so XP/level/gold can **only** change
+inside the definer functions.
 
 **Client Call:**
 ```javascript
 const { data, error } = await supabase.rpc('complete_quest', { quest_id: '...' })
+// data -> { success, xp_gained, gold_gained, level, rank, leveled_up, streak, ... }
 ```
+
+**Other RPCs:** `apply_job_change(p_class)` (onboarding: sets class + attribute
+boosts, grants starter gold + quests) and `get_leaderboard(limit_count)` (public
+ranking that bypasses per-row RLS to expose only non-sensitive columns).
+
+## Expansion features (tables + RPCs)
+
+| Domain | Tables | Key RPCs |
+| :--- | :--- | :--- |
+| **Penalty Zone** | `users.penalty_active`, `quests.is_survival` | `check_penalty()` — detects an overdue quest, flips penalty on, spawns a Survival Quest. `complete_quest` blocks non-survival XP while penalty is active; clearing the Survival Quest lifts it. |
+| **Achievements** | `achievements`, `user_achievements` | `evaluate_achievements(user)` — called inside `complete_quest`/`clear_floor`; unlocks once and credits bonus XP. |
+| **Dungeons** | `dungeons`, `dungeon_floors`, `rune_stones` | `create_dungeon(...)` (atomic dungeon + ordered floors), `clear_floor(floor)` (clears a floor; last floor defeats the boss → grants a Rune Stone + XP/gold). |
+| **Shadows** | `users.referral_code`, `shadows` | `bind_shadow(code)` (servant binds to a code owner, once), `get_my_shadows()` (definer list of the caller's shadows). `complete_quest` pays the master 5% of each shadow's XP. |
+| **Shop** | `shop_items`, `user_items`, `users.title` | `purchase_item(code)` — spends gold (server-checked), then permanently raises an attribute (`ATTR`) or unlocks a `TITLE`. Gold is the economy sink. |
+| **Streak decay** | — | `check_penalty()` also resets `current_streak` to 0 when no completion has occurred since before yesterday (no `pg_cron` dependency). |
+
+All progression-mutating RPCs are `SECURITY DEFINER` and route stat changes
+through `award_xp`, which sets the `app.allow_stat_update` session flag so the
+`protect_user_stats` trigger permits the write. Direct PostgREST writes to
+XP/level/rank/gold/streak/attributes/penalty/referral columns are rejected.

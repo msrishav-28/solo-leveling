@@ -7,6 +7,7 @@ import TextReveal from '../../components/cinematic/TextReveal';
 import Magnetic from '../../components/cinematic/Magnetic';
 import SystemBox from '../../components/cinematic/SystemBox';
 import Button from '../../components/ui/Button';
+import { supabase } from '../../lib/supabase';
 
 const classes = [
   {
@@ -45,9 +46,28 @@ const JobChange = () => {
   const navigate = useNavigate();
   const [selectedClass, setSelectedClass] = useState(null);
   const [step, setStep] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [goldGranted, setGoldGranted] = useState(100);
 
-  const handleSelect = (classId) => {
+  const handleSelect = async (classId) => {
     setSelectedClass(classId);
+    setSubmitting(true);
+    setError(null);
+
+    // Persist the class + grant starter gold/quests server-side (anti-cheat).
+    const { data, error: rpcError } = await supabase.rpc('apply_job_change', {
+      p_class: classId.toUpperCase(),
+    });
+
+    setSubmitting(false);
+
+    if (rpcError) {
+      setError(rpcError.message);
+      setSelectedClass(null);
+      return;
+    }
+    if (data?.gold_granted != null) setGoldGranted(data.gold_granted);
     setStep(2);
   };
 
@@ -96,6 +116,14 @@ const JobChange = () => {
                 <div className="text-center">
                   <div className="system-label justify-center">[Select Class]</div>
                   <h2 className="font-display text-glow-soft mt-4 text-4xl sm:text-6xl">Job Change</h2>
+                  {submitting && (
+                    <p className="mt-4 font-mono text-xs uppercase tracking-[0.25em] text-mana/70 animate-pulse">
+                      Binding contract with the System...
+                    </p>
+                  )}
+                  {error && (
+                    <p className="mt-4 font-mono text-xs uppercase tracking-[0.18em] text-threat">ERROR: {error}</p>
+                  )}
                 </div>
 
                 <div className="grid gap-px bg-hairline md:grid-cols-3">
@@ -107,7 +135,8 @@ const JobChange = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.12 }}
                       onClick={() => handleSelect(item.id)}
-                      className="group relative flex min-h-[430px] flex-col bg-void p-8 text-left transition-colors hover:bg-mana/[0.03]"
+                      disabled={submitting}
+                      className="group relative flex min-h-[430px] flex-col bg-void p-8 text-left transition-colors hover:bg-mana/[0.03] disabled:pointer-events-none disabled:opacity-50"
                     >
                       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-mana/0 to-transparent transition-all duration-700 group-hover:via-mana" />
                       <div className="flex items-start justify-between">
@@ -157,7 +186,7 @@ const JobChange = () => {
                   </div>
                   <div className="mt-8 border-y border-loot/20 py-6">
                     <div className="font-mono text-xs uppercase tracking-[0.25em] text-loot/75">Reward Acquired</div>
-                    <div className="mt-3 text-4xl font-display text-loot">+100 Gold</div>
+                    <div className="mt-3 text-4xl font-display text-loot">+{goldGranted} Gold</div>
                   </div>
                   <Magnetic>
                     <Button variant="gold" size="lg" className="mt-8 w-full" onClick={() => navigate('/dashboard')}>
